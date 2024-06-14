@@ -7,8 +7,8 @@ import (
 	"time"
 )
 
-func (c CrawlerService) proxyClient() *http.Client {
-	urlProxy, _ := url.Parse(config.Conf.Proxy.ProxyURL)
+func proxyClient() *http.Client {
+	urlProxy, _ := url.Parse(config.Conf.General.ProxyURL)
 	transport := &http.Transport{
 		Proxy: http.ProxyURL(urlProxy),
 	}
@@ -20,9 +20,9 @@ func (c CrawlerService) proxyClient() *http.Client {
 
 	return client
 }
-func (c CrawlerService) httpClient() *http.Client {
-	if config.Conf.Proxy.Enabled {
-		return c.proxyClient()
+func httpClient() *http.Client {
+	if config.Conf.General.ProxyEnabled {
+		return proxyClient()
 	} else {
 		return &http.Client{
 			Timeout: 5 * time.Second, // Definir um timeout de 5 segundos
@@ -34,10 +34,10 @@ func (c CrawlerService) httpClient() *http.Client {
 	}
 }
 
-func (c CrawlerService) httpRequest(pageUrl string) (resp *http.Response, err error) {
-	client := c.httpClient()
+func httpRequest(pageUrl string) (resp *http.Response, err error) {
+	client := httpClient()
 	req, _ := http.NewRequest("GET", pageUrl, nil)
-	req.Header.Set("User-Agent", config.Conf.UserAgent)
+	req.Header.Set("User-Agent", config.Conf.General.UserAgent)
 	resp, err = client.Do(req)
 	return
 }

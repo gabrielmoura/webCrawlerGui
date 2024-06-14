@@ -1,68 +1,121 @@
 package config
 
 import (
-	"strings"
+	"WebCrawlerGui/backend/consts"
+	"WebCrawlerGui/backend/infra/log"
+	"WebCrawlerGui/backend/types"
+	"github.com/vrischmann/userdir"
+	"go.uber.org/zap"
+	"gopkg.in/yaml.v3"
+	"os"
+	"path"
+	"sync"
 )
-
-func splitComma(txt string) []string {
-	if txt == "" {
-		return []string{}
-	}
-	return strings.Split(txt, ",")
-}
-
-type Config struct {
-	MaxConcurrency int          `mapstructure:"MAX_CONCURRENCY"`
-	MaxDepth       int          `mapstructure:"MAX_DEPTH"`
-	PostgresURI    string       `mapstructure:"POSTGRES_URI"`
-	AppName        string       `mapstructure:"APP_NAME"`
-	TimeFormat     string       `mapstructure:"TIME_FORMAT"`
-	TimeZone       string       `mapstructure:"TIME_ZONE"`
-	InicialURL     string       `mapstructure:"URL"`
-	Cache          *CacheConfig `mapstructure:"CACHE"`
-	Proxy          *Proxy       `mapstructure:"PROXY"`
-	Filter         *Filter      `mapstructure:"FILTER"`
-	UserAgent      string       `mapstructure:"USER_AGENT"`
-}
-type CacheConfig struct {
-	DBDir string `mapstructure:"DB_DIR"`
-	Mode  string `mapstructure:"MODE"` // "mem" or "disc'
-}
-type Proxy struct {
-	Enabled  bool   `mapstructure:"ENABLED"`
-	ProxyURL string `mapstructure:"PROXY_URL"`
-}
-type Filter struct {
-	Tlds        []string `mapstructure:"TLDS"`
-	IgnoreLocal bool     `mapstructure:"IGNORE_LOCAL"`
-}
 
 var Conf *Config
 
-func loadDefault() error {
-	cfg := &Config{
+type Config struct {
+	sync.RWMutex `yaml:"-" json:"-"`
+	AppName      string                    `json:"app_name" yaml:"app_name"`
+	AppVersion   string                    `json:"app_version" yaml:"app_version"`
+	Behavior     types.PreferencesBehavior `json:"behavior" yaml:"behavior"`
+	General      types.PreferencesGeneral  `json:"general" yaml:"general"`
+}
 
-		AppName:        "WebCrawler",
-		TimeFormat:     "02-Jan-2006",
-		TimeZone:       "America/Sao_Paulo",
-		MaxConcurrency: 10,
-		MaxDepth:       2,
-		PostgresURI:    "postgres://postgres:Strong@P4ssword@localhost/crawler",
-		UserAgent:      "Go-http-client/1.1",
-		Cache: &CacheConfig{
-			DBDir: "/tmp/WebCrawler",
-			Mode:  "mem",
-		},
-		Proxy: &Proxy{
-			Enabled:  false,
-			ProxyURL: "",
-		},
-		Filter: &Filter{
-			Tlds:        splitComma(""),
-			IgnoreLocal: false,
-		},
+func InitConfig(appName string, appVersion string) *Config {
+	cs := &Config{
+		AppName:    appName,
+		AppVersion: appVersion,
 	}
-	// Atualiza a variável global Conf
-	Conf = cfg
+	err := cs.LoadConfig()
+	if err != nil {
+		log.Logger.Error("Error loading config", zap.Error(err))
+		panic(err)
+	}
+	Conf = cs
+	return cs
+}
+
+// MÉTODOS INTERNOS
+
+func (c *Config) getPath(fileName string) string {
+	return path.Join(userdir.GetConfigHome(), c.AppName, fileName)
+}
+
+func ensureDirExists(dirPath string) error {
+	if _, err := os.Stat(dirPath); os.IsNotExist(err) {
+		if err := os.MkdirAll(dirPath, 0777); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (c *Config) SaveFileConfig() error {
+	c.Lock()
+	defer c.Unlock()
+
+	cData, err := yaml.Marshal(c)
+	if err != nil {
+		return err
+	}
+
+	dir := path.Dir(c.getPath(""))
+	if err := ensureDirExists(dir); err != nil {
+		return err
+	}
+
+	if err := os.WriteFile(c.getPath("config.yml"), cData, 0666); err != nil { // Alterei para 0666 para ser mais seguro
+		return err
+	}
+
+	return nil
+}
+
+func (c *Config) DefaultConfig() {
+	c.Behavior = types.PreferencesBehavior{
+		WindowMaximised: true,
+		AsideWidth:      consts.DEFAULT_ASIDE_WIDTH,
+		WindowWidth:     consts.DEFAULT_WINDOW_WIDTH,
+		WindowHeight:    consts.DEFAULT_WINDOW_HEIGHT,
+	}
+	c.General = types.PreferencesGeneral{
+		AppName:          c.AppName,
+		Theme:            "auto",
+		Language:         "auto",
+		FontSize:         consts.DEFAULT_FONT_SIZE,
+		ScanSize:         consts.DEFAULT_SCAN_SIZE,
+		CheckUpdate:      true,
+		TimeFormat:       "02-Jan-2006",
+		TimeZone:         "America/Sao_Paulo",
+		MaxConcurrency:   10,
+		MaxDepth:         2,
+		EnableProcessing: false,
+		UserAgent:        "Go-http-client/1.1",
+		ProxyEnabled:     false,
+		ProxyURL:         "",
+		Tlds:             []string{},
+		IgnoreLocal:      false,
+	}
+}
+
+func (c *Config) LoadConfig() error {
+	//c.RLock()
+	//defer c.RUnlock()
+
+	if _, err := os.Stat(c.getPath("config.yml")); os.IsNotExist(err) {
+		c.DefaultConfig()
+		return c.SaveFileConfig()
+	}
+
+	cData, err := os.ReadFile(c.getPath("config.yml"))
+	if err != nil {
+		return err
+	}
+
+	if err := yaml.Unmarshal(cData, c); err != nil {
+		return err
+	}
+
 	return nil
 }

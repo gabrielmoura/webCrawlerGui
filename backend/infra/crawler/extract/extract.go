@@ -36,25 +36,25 @@ func extractDescription(n *html.Node, dataPage *data.Page) {
 }
 
 func extractMeta(n *html.Node, dataPage *data.Page) {
-	if n.Type == html.ElementNode && n.Data == "meta" {
-		var content string
-		var isDescription bool
-		for _, a := range n.Attr {
-			if a.Key == "name" && a.Val == "description" {
-				isDescription = true
-				break
-			}
-			if a.Key == "content" {
-				content = a.Val
-			}
-		}
-		if !isDescription && content != "" {
-			dataPage.Meta = append(dataPage.Meta, content)
-		}
-	}
-	for c := n.FirstChild; c != nil; c = c.NextSibling {
-		extractMeta(c, dataPage)
-	}
+	//if n.Type == html.ElementNode && n.Data == "meta" {
+	//	//var content string
+	//	//var isDescription bool
+	//	for _, a := range n.Attr {
+	//		if a.Key == "name" && a.Val == "description" {
+	//			isDescription = true
+	//			break
+	//		}
+	//		if a.Key == "content" {
+	//			content = a.Val
+	//		}
+	//	}
+	//	//if !isDescription && content != "" {
+	//	//	dataPage.Meta = append(dataPage.Meta, content)
+	//	//}
+	//}
+	//for c := n.FirstChild; c != nil; c = c.NextSibling {
+	//	extractMeta(c, dataPage)
+	//}
 }
 
 func ExtractData(n *html.Node) (*data.Page, error) {

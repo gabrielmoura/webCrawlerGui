@@ -4,9 +4,9 @@ import { QueryClient } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { FRootLayout } from '../theme/layout'
 import {useEffect} from "react";
-import {GetPreferences} from "../../wailsjs/go/services/PreferencesService";
 import {types} from "../../wailsjs/go/models.ts";
 import useAppStore from "../store/appStore.ts";
+import {GetPreferences} from "../../wailsjs/go/services/ConfigService";
 
 export const Route = createRootRouteWithContext<{
     queryClient: QueryClient

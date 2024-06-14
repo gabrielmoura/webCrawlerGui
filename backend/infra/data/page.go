@@ -1,16 +1,18 @@
 package data
 
-import "time"
+import (
+	"time"
+)
 
 type Page struct {
-	Url         string         `json:"url" bson:"url" db:"url"`
-	Links       []string       `json:"links" bson:"links" db:"links"`
-	Title       string         `json:"title" bson:"title" db:"title"`
-	Description string         `json:"description" bson:"description" db:"description"`
-	Meta        *MetaData      `json:"meta" bson:"meta" db:"meta"`
-	Visited     bool           `json:"visited" bson:"visited" db:"visited"`
-	Timestamp   time.Time      `json:"timestamp" bson:"timestamp" db:"timestamp"`
-	Words       map[string]int `json:"words" bson:"words" db:"words"`
+	Url         string           `json:"url" bson:"url" db:"url"`
+	Links       []string         `json:"links" bson:"links" db:"links"`
+	Title       string           `json:"title" bson:"title" db:"title"`
+	Description string           `json:"description" bson:"description" db:"description"`
+	Meta        *MetaData        `json:"meta" bson:"meta" db:"meta"`
+	Visited     bool             `json:"visited" bson:"visited" db:"visited"`
+	Timestamp   time.Time        `json:"timestamp" bson:"timestamp" db:"timestamp"`
+	Words       map[string]int32 `json:"words" bson:"words" db:"words"`
 }
 type MetaData struct {
 	OG       map[string]string `json:"og" bson:"og"`
@@ -30,7 +32,7 @@ type PageSearch struct {
 type PageSearchWithFrequency struct {
 	Url       string `json:"url" bson:"url"`
 	Title     string `json:"title" bson:"title"`
-	Frequency int    `json:"frequency" bson:"frequency"`
+	Frequency int32  `json:"frequency" bson:"frequency"`
 }
 
 type QueueType struct {

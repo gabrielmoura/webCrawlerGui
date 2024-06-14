@@ -2,6 +2,7 @@ package config
 
 var QueueName = "queueIndex"
 var VisitedIndexName = "visitedIndex"
+var PageDataIndexName = "pageDataIndex"
 
 // AcceptableMimeTypes Mimes aceitos, checagem quando visitado
 var AcceptableMimeTypes = []string{

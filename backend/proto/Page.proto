@@ -1,0 +1,22 @@
+syntax = "proto3";
+package pb;
+option go_package = "backend/infra/pb";
+
+message Page{
+  string Url = 1;
+  repeated string Links = 2;
+  string Title = 3;
+  string Description = 4;
+  PageMeta Meta = 5;
+  bool Visited = 6;
+  string Timestamp = 7;
+  map<string, int32> Words = 8;
+}
+
+message PageMeta{
+  map<string, string>  OG = 1;
+  repeated string      Keywords = 2;
+  string Manifest = 3;
+  string Ld = 4;
+}
+

@@ -20,6 +20,8 @@ interface GeneralSliceActions {
 
     //maxconcurrency
     setMaxConcurrency(maxConcurrency: number): void
+
+    setEnableProcessing(enableProcessing: boolean): void
 }
 
 export type GeneralStore = GeneralSlice & GeneralSliceActions;
@@ -38,7 +40,7 @@ export const createGeneralSlice: StateCreator<
         },
         setProxy: (proxy) => {
             let g = get().General;
-            g!.proxy!.proxyURL = proxy;
+            g!.proxyURL = proxy;
             set({General: g}, false, "setProxy");
         },
         setMaxDepth: (maxDepth) => {
@@ -50,6 +52,12 @@ export const createGeneralSlice: StateCreator<
             let g = get().General;
             g!.maxConcurrency = maxConcurrency;
             set({General: g}, false, "setMaxConcurrency");
-        }
+        },
+        setEnableProcessing: (enableProcessing) => {
+            let g = get().General;
+            g!.enableProcessing = enableProcessing;
+            set({General: g}, false, "setEnableProcessing");
+        },
+
     });
 };

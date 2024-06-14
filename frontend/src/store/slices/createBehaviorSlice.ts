@@ -1,7 +1,7 @@
 import {StateCreator} from "zustand";
 import {types} from "../../../wailsjs/go/models";
 import {EventsEmit} from "../../../wailsjs/runtime";
-import {SaveWindowPosition, SaveWindowSize, SetPreferences} from "../../../wailsjs/go/services/PreferencesService";
+import {SaveWindowPosition, SaveWindowSize, SetPreferences} from "../../../wailsjs/go/services/ConfigService";
 // import {SaveWindowPosition, SaveWindowSize, SetPreferences} from "@wails/go/services/PreferencesService";
 // import {types} from "@wails/go/models";
 // import {EventsEmit} from "@wails/runtime";

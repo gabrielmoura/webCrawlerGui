@@ -4,11 +4,12 @@ import (
 	"WebCrawlerGui/backend/config"
 	"WebCrawlerGui/backend/infra/data"
 	"WebCrawlerGui/backend/infra/db"
-	"WebCrawlerGui/backend/types"
+	"WebCrawlerGui/backend/infra/log"
 	"bytes"
 	"context"
 	"errors"
 	"fmt"
+
 	"go.uber.org/zap"
 	"golang.org/x/net/html"
 	"io"
@@ -23,61 +24,56 @@ var (
 )
 
 type CrawlerService struct {
-	logger  *zap.Logger
-	conf    types.PreferencesGeneral
-	ctx     context.Context
-	db      *db.Database
-	enabled bool
+	Ctx context.Context
 }
 
-func InitCrawlerService(ctx context.Context, logger *zap.Logger,
-	conf types.PreferencesGeneral, db *db.Database) *CrawlerService {
+var Cs CrawlerService
 
-	return &CrawlerService{
-		logger: logger,
-		conf:   conf,
-		ctx:    ctx,
-		db:     db,
+func Mount(
+	Ctx context.Context) {
+
+	Cs = CrawlerService{
+		Ctx: Ctx,
 	}
 }
 
 // processPage processa uma página, extrai links e dados
-func (c CrawlerService) processPage(pageUrl string, depth int) {
+func processPage(pageUrl string, depth int) {
 
-	c.logger.Debug(fmt.Sprintf("Looping queue, depth: %d", depth))
-	if depth > c.conf.MaxDepth {
-		c.logger.Info(fmt.Sprintf("Reached max depth of %d, %d", c.conf.MaxDepth, depth))
+	log.Logger.Debug(fmt.Sprintf("Looping queue, depth: %d", depth))
+	if depth > config.Conf.General.MaxDepth {
+		log.Logger.Info(fmt.Sprintf("Reached max depth of %d, %d", config.Conf.General.MaxDepth, depth))
 		return
 	}
 	// Só processa uma página se ela ainda não foi visitada
 
-	if c.GetVisited(pageUrl) {
+	if GetVisited(pageUrl) {
 		return
 	}
 
-	c.logger.Info(fmt.Sprintf("Visiting %s", pageUrl))
-	plainText, htmlDoc, err := c.visitLink(pageUrl)
+	log.Logger.Info(fmt.Sprintf("Visiting %s", pageUrl))
+	plainText, htmlDoc, err := visitLink(pageUrl)
 	if err != nil {
 		if errors.Is(err, mimeNotAllow) {
 			//log.Logger.Info(fmt.Sprintf("MIME not allowed: %s", pageUrl))
 			return
 		}
-		c.logger.Debug(fmt.Sprintf("Error checking link: %s", err))
+		log.Logger.Debug(fmt.Sprintf("Error checking link: %s", err))
 		return
 	}
 
-	links, err := c.extractLinks(pageUrl, htmlDoc)
+	links, err := extractLinks(pageUrl, htmlDoc)
 	if err != nil {
-		c.logger.Error(fmt.Sprintf("Error extracting links: %s", err))
+		log.Logger.Error(fmt.Sprintf("Error extracting links: %s", err))
 		return
 	}
 
-	dataPage, err := c.extractData(htmlDoc)
+	dataPage, err := extractData(htmlDoc)
 	if err != nil {
-		c.logger.Error(fmt.Sprintf("Error extracting data: %s", err))
+		log.Logger.Error(fmt.Sprintf("Error extracting data: %s", err))
 		return
 	}
-	words, _ := c.countWordsInText(plainText)
+	words, _ := countWordsInText(plainText)
 
 	dataPage.Words = words
 	dataPage.Url = pageUrl
@@ -85,37 +81,36 @@ func (c CrawlerService) processPage(pageUrl string, depth int) {
 	dataPage.Timestamp = time.Now()
 	dataPage.Visited = true
 
-	c.SetPage(pageUrl, dataPage)
+	SetPage(pageUrl, dataPage)
 
-	c.SetVisited(pageUrl)
+	SetVisited(pageUrl)
 
-	c.handleAddToQueue(links, depth+1)
+	handleAddToQueue(links, depth+1)
+}
+func HandleQueue(initialURL string) {
+	// Só processa a fila se ela não estiver vazia
+	log.Logger.Info("Handling queue")
+
+	ok, _, err := db.DB.GetFromQueue()
+
+	if err != nil { // Check if queue is empty
+		log.Logger.Info("Queue is empty", zap.Error(err))
+	}
+	if ok == "" {
+		db.DB.AddToQueue(initialURL, 0)
+	}
+	LoopQueue()
 }
 
-//func HandleQueue(initialURL string) {
-//	// Só processa a fila se ela não estiver vazia
-//	log.Logger.Info("Handling queue")
-//	ok, _, err := cache.GetFromQueue()
-//
-//	if err != nil { // Check if queue is empty
-//		log.Logger.Info("Queue is empty", zap.Error(err))
-//	}
-//	if ok == "" {
-//		cache.AddToQueue(initialURL, 0)
-//	}
-//	LoopQueue()
-//}
-
-func (c CrawlerService) LoopQueue() {
-
+func LoopQueue() {
 	for {
-		if c.enabled {
-			if c.ctx.Done() != nil {
-				break
+		if config.Conf.General.EnableProcessing {
+			links, err := db.DB.GetFromQueueV2(config.Conf.General.MaxConcurrency) // Get a batch of links
+			if err != nil {
+				log.Logger.Error("Error getting from queue", zap.Error(err))
 			}
-			links, notLinks := c.db.GetFromQueueV2(c.conf.MaxConcurrency) // Get a batch of links
-			if len(links) == 0 || notLinks != nil {
-				c.logger.Info("Queue is empty", zap.Error(notLinks))
+			if len(links) == 0 {
+				log.Logger.Info("Queue is empty", zap.Any("Links", links))
 				break
 			}
 
@@ -127,30 +122,32 @@ func (c CrawlerService) LoopQueue() {
 
 				go func(link data.QueueType) {
 					defer Wg.Done()
-					c.processPage(link.Url, link.Depth)
+					processPage(link.Url, link.Depth)
 				}(link)
 			}
 			Wg.Wait()
 		}
-		time.Sleep(2 * time.Second)
+		time.Sleep(1 * time.Second)
+		log.Logger.Debug("Looping queue")
+
 	}
 }
 
-func (c CrawlerService) visitLink(pageUrl string) ([]byte, *html.Node, error) {
-	resp, err := c.httpRequest(pageUrl)
+func visitLink(pageUrl string) ([]byte, *html.Node, error) {
+	resp, err := httpRequest(pageUrl)
 	if err != nil {
 		return nil, nil, fmt.Errorf("error fetching URL %s: %w", pageUrl, err)
 	}
 	defer resp.Body.Close()
 
-	if c.isStatusErr(resp.StatusCode, resp.Request.URL) {
+	if isStatusErr(resp.StatusCode, resp.Request.URL) {
 		// TODO: Implementar lógica para por em outra fila e ternar novamente
-		c.logger.Info("Status Error", zap.String("URL", pageUrl), zap.String("Status", resp.Status))
+		log.Logger.Info("Status Error", zap.String("URL", pageUrl), zap.String("Status", resp.Status))
 		return nil, nil, ErrUnexpectedStatus
 	}
 
 	// Streamlined MIME type check and early return
-	if !c.isAllowedMIME(resp.Header.Get("Content-Type"), config.AcceptableMimeTypes) {
+	if !isAllowedMIME(resp.Header.Get("Content-Type"), config.AcceptableMimeTypes) {
 		return nil, nil, mimeNotAllow
 	}
 

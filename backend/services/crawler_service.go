@@ -1,35 +1,68 @@
 package services
 
 import (
-	"context"
-
+	"WebCrawlerGui/backend/config"
 	"WebCrawlerGui/backend/infra/crawler"
 	"WebCrawlerGui/backend/infra/db"
-	"WebCrawlerGui/backend/storage"
+	"WebCrawlerGui/backend/infra/log"
 	"WebCrawlerGui/backend/types"
+	"context"
 	"go.uber.org/zap"
 )
 
-type CrawlingService struct {
-	logger *zap.Logger
-	conf   types.PreferencesGeneral
-	db     *db.Database
+type CrawlerService struct {
+	Ctx context.Context
 }
 
-func (s CrawlingService) Start(ctx context.Context, conf *PreferencesService) {
-	s.logger.Info("Crawling service started")
-
-	cfg := conf.pref
-	s.conf = cfg.GetPreferences().General
-
-	service := crawler.InitCrawlerService(ctx, s.logger, s.conf, s.db)
-
-	service.LoopQueue()
+func (c CrawlerService) Handle(ctx context.Context) {
+	log.Logger.Info("Crawling service started")
+	c.Ctx = ctx
+	crawler.Mount(c.Ctx)
+	go crawler.LoopQueue()
 }
-func (s CrawlingService) AddToQueue(url string) types.JSResp {
-	//crawler.AddToQueue(url)
-	err := s.db.AddToQueue(url, 0)
+func (c CrawlerService) HandleClose() {
+	log.Logger.Info("Crawling service stopped")
+	err := db.DB.CloseDB()
 	if err != nil {
+		log.Logger.Error("Error closing database", zap.Error(err))
+		return
+	}
+}
+
+func (c CrawlerService) Start() types.JSResp {
+	log.Logger.Info("Crawling service started")
+	config.Conf.General.EnableProcessing = true
+	err := config.Conf.SaveFileConfig()
+	if err != nil {
+		return types.JSResp{
+			Success: false,
+			Msg:     "Error saving configuration",
+		}
+	}
+	return types.JSResp{
+		Success: true,
+		Msg:     "Crawling service started",
+	}
+}
+func (c CrawlerService) Stop() types.JSResp {
+	log.Logger.Info("Crawling service stopped")
+	config.Conf.General.EnableProcessing = false
+	err := config.Conf.SaveFileConfig()
+	if err != nil {
+		return types.JSResp{
+			Success: false,
+			Msg:     "Error saving configuration",
+		}
+	}
+	return types.JSResp{
+		Success: true,
+		Msg:     "Crawling service stopped",
+	}
+}
+func (c CrawlerService) AddToQueue(url string) types.JSResp {
+	err := db.DB.AddToQueue(url, 0)
+	if err != nil {
+		log.Logger.Error("Error adding URL to queue", zap.Error(err))
 		return types.JSResp{
 			Success: false,
 			Msg:     "Error adding URL to queue",
@@ -40,10 +73,10 @@ func (s CrawlingService) AddToQueue(url string) types.JSResp {
 		Msg:     "URL added to queue",
 	}
 }
-func (s CrawlingService) GetAllQueue() types.JSResp {
-	queue, err := s.db.Read()
+func (c CrawlerService) GetPaginatedQueue(pag types.Paginated) types.JSResp {
+	queue, err := db.DB.ReadPaginated(pag.Limit, pag.Offset)
 	if err != nil {
-		s.logger.Error("Error getting queue", zap.Error(err))
+		log.Logger.Error("Error getting queue", zap.Error(err))
 		return types.JSResp{
 			Success: false,
 			Msg:     "Error getting queue",
@@ -61,8 +94,30 @@ func (s CrawlingService) GetAllQueue() types.JSResp {
 		Data:    queue,
 	}
 }
-func (s CrawlingService) DeleteQueue(url string) types.JSResp {
-	err := s.db.Delete(url)
+
+func (c CrawlerService) GetAllQueue() types.JSResp {
+	queue, err := db.DB.Read()
+	if err != nil {
+		log.Logger.Error("Error getting queue", zap.Error(err))
+		return types.JSResp{
+			Success: false,
+			Msg:     "Error getting queue",
+		}
+	}
+	if len(queue) == 0 {
+		return types.JSResp{
+			Success: true,
+			Msg:     "There is no data to display",
+			Data:    []string{},
+		}
+	}
+	return types.JSResp{
+		Success: true,
+		Data:    queue,
+	}
+}
+func (c CrawlerService) DeleteQueue(url string) types.JSResp {
+	err := db.DB.Delete(url)
 	if err != nil {
 		return types.JSResp{
 			Success: false,
@@ -76,35 +131,28 @@ func (s CrawlingService) DeleteQueue(url string) types.JSResp {
 }
 
 // Search pesquisa páginas por título, descrição ou conteúdo
-func (s CrawlingService) Search(args string) types.JSResp {
-	// queue, err := s.db.Search(args)
-	// if err != nil {
-	// 	s.logger.Error("Error searching queue", zap.Error(err))
-	// 	return types.JSResp{
-	// 		Success: false,
-	// 		Msg:     "Error searching queue",
-	// 	}
-	// }
-	// if len(queue) == 0 {
-	// 	return types.JSResp{
-	// 		Success: true,
-	// 		Msg:     "There is no data to display",
-	// 		Data:    []string{},
-	// 	}
-	// }
+func (c CrawlerService) Search(args string) types.JSResp {
+	queue, err := db.DB.Search(args)
+	if err != nil {
+		log.Logger.Error("Error searching queue", zap.Error(err))
+		return types.JSResp{
+			Success: false,
+			Msg:     "Error searching queue",
+		}
+	}
+	if len(queue) == 0 {
+		return types.JSResp{
+			Success: true,
+			Msg:     "There is no data to display",
+		}
+	}
 	return types.JSResp{
 		Success: true,
-		Msg:     "Not implemented",
+		Data:    queue,
 	}
 }
-func Crawling(appName string) *CrawlingService {
-	logger, _ := zap.NewProduction()
-	defer logger.Sync()
-	dbPath := storage.NewCacheStore(appName, "")
 
-	database := db.InitDB(dbPath.ConfPath, logger)
-	return &CrawlingService{
-		logger: logger,
-		db:     database,
-	}
+func Crawling(appName string) *CrawlerService {
+	db.InitDB(appName)
+	return &CrawlerService{}
 }

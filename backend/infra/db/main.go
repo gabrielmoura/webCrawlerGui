@@ -3,13 +3,14 @@ package db
 import (
 	"WebCrawlerGui/backend/config"
 	"WebCrawlerGui/backend/infra/data"
-	"encoding/json"
+	"WebCrawlerGui/backend/infra/log"
 	"errors"
 	"fmt"
 	"github.com/dgraph-io/badger/v4"
+	"github.com/vrischmann/userdir"
 	"go.uber.org/zap"
+	"path"
 	"sort"
-	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -20,27 +21,37 @@ var (
 	blockWrite sync.RWMutex
 )
 
+var DB *Database
+
 type Database struct {
-	db     *badger.DB
-	logger *zap.Logger
+	db *badger.DB
+}
+
+func getDbPath(appName string) string {
+	dbPath := path.Join(userdir.GetDataHome(), appName)
+	log.Logger.Info("BD", zap.String("path", dbPath))
+	return dbPath
 }
 
 // InitDB inicializa a sessão do banco de dados
-func InitDB(path string, logger *zap.Logger) *Database {
-	opts := badger.DefaultOptions(path)
-	opts.Logger = nil // Desativa logs de debug
-	opts.CompactL0OnClose = true
+func InitDB(appName string) *Database {
+	opts := badger.DefaultOptions(getDbPath(appName))
+	//opts.Logger = nil // Desativa logs de debug
+	//opts.CompactL0OnClose = true
 	opts.NumCompactors = 2
 	opts.ValueLogFileSize = 100 << 20 // 100 MB
 
 	db, err := badger.Open(opts)
 	if err != nil {
-		logger.Fatal("error initializing database", zap.Error(err))
+		log.Logger.Fatal("error initializing database", zap.Error(err))
 	}
-	return &Database{
-		db:     db,
-		logger: logger,
+
+	cdb := &Database{
+		db: db,
 	}
+	//go cdb.OptimizeCache(5)
+	DB = cdb
+	return cdb
 }
 
 // CloseDB fecha a sessão do banco de dados
@@ -51,7 +62,7 @@ func (d Database) CloseDB() error {
 }
 func (d Database) SyncCache() error {
 	time.Sleep(1 * time.Second)
-	d.logger.Info("Syncing cache")
+	log.Logger.Info("Syncing cache")
 
 	visited, err := d.AllVisited()
 	if err != nil {
@@ -69,14 +80,16 @@ func (d Database) SyncCache() error {
 	}
 	return nil
 }
-func (d Database) OptimizeCache() {
+
+// OptimizeCache Otimiza Banco a cada n minutos
+func (d Database) OptimizeCache(nMinute int) {
 	for {
-		time.Sleep(2 * time.Minute)
-		d.logger.Info("Optimizing cache")
+		time.Sleep(time.Duration(nMinute) * time.Minute)
+		log.Logger.Info("Optimizing cache")
 		blockWrite.Lock()
 		err := d.db.RunValueLogGC(0.9)
 		if err != nil && !errors.Is(badger.ErrNoRewrite, err) {
-			d.logger.Info("error optimizing cache", zap.Error(err))
+			log.Logger.Info("error optimizing cache", zap.Error(err))
 		}
 		blockWrite.Unlock()
 	}
@@ -145,11 +158,11 @@ func (d Database) WritePage(page *data.Page) error {
 	blockWrite.RLock()
 	defer blockWrite.RUnlock()
 	return d.db.Update(func(txn *badger.Txn) error {
-		data, err := json.Marshal(page)
+		bytes, err := pageMarshal(page)
 		if err != nil {
 			return err
 		}
-		return txn.Set([]byte(page.Url), data)
+		return txn.Set([]byte(page.Url), bytes)
 	})
 }
 
@@ -162,7 +175,7 @@ func (d Database) ReadPage(url string) (*data.Page, error) {
 			return err
 		}
 		return item.Value(func(val []byte) error {
-			return json.Unmarshal(val, &page)
+			return pageUnmarshal(val, &page)
 		})
 	})
 	if err == badger.ErrKeyNotFound {
@@ -189,46 +202,55 @@ func (d Database) ReadPage(url string) (*data.Page, error) {
 // AllVisited recupera todos os URLs visitados
 func (d Database) AllVisited() ([]string, error) {
 	var urls []string
+	prefixKey := []byte(fmt.Sprintf("%s:", config.VisitedIndexName))
+
 	err := d.db.View(func(txn *badger.Txn) error {
 		opts := badger.DefaultIteratorOptions
+		opts.Prefix = prefixKey
 		it := txn.NewIterator(opts)
 		defer it.Close()
 
-		for it.Rewind(); it.Valid(); it.Next() {
+		for it.Seek(prefixKey); it.ValidForPrefix(prefixKey); it.Next() {
 			item := it.Item()
 			var page data.Page
-			err := item.Value(func(val []byte) error {
-				return json.Unmarshal(val, &page)
-			})
-			if err != nil {
+
+			if err := item.Value(func(val []byte) error {
+				return pageUnmarshal(val, &page)
+			}); err != nil {
 				return err
 			}
+
 			if page.Visited {
 				urls = append(urls, page.Url)
 			}
 		}
 		return nil
 	})
+
 	return urls, err
 }
 
 // SearchByTitleOrDescription pesquisa páginas por título ou descrição
 func (d Database) SearchByTitleOrDescription(searchTerm string) ([]data.PageSearch, error) {
 	var pages []data.PageSearch
+	prefixKey := []byte(fmt.Sprintf("%s:", config.PageDataIndexName))
+
 	err := d.db.View(func(txn *badger.Txn) error {
 		opts := badger.DefaultIteratorOptions
+		opts.Prefix = prefixKey
 		it := txn.NewIterator(opts)
 		defer it.Close()
 
-		for it.Rewind(); it.Valid(); it.Next() {
+		for it.Seek(prefixKey); it.ValidForPrefix(prefixKey); it.Next() {
 			item := it.Item()
 			var page data.Page
-			err := item.Value(func(val []byte) error {
-				return json.Unmarshal(val, &page)
-			})
-			if err != nil {
+
+			if err := item.Value(func(val []byte) error {
+				return pageUnmarshal(val, &page)
+			}); err != nil {
 				return err
 			}
+
 			if containsIgnoreCase(page.Title, searchTerm) || containsIgnoreCase(page.Description, searchTerm) {
 				pages = append(pages, data.PageSearch{
 					Url:   page.Url,
@@ -238,6 +260,7 @@ func (d Database) SearchByTitleOrDescription(searchTerm string) ([]data.PageSear
 		}
 		return nil
 	})
+
 	return pages, err
 }
 
@@ -249,20 +272,24 @@ func containsIgnoreCase(text, substr string) bool {
 // SearchByContent pesquisa páginas por conteúdo e ordena por frequência
 func (d Database) SearchByContent(searchTerm string) ([]data.PageSearchWithFrequency, error) {
 	var pages []data.PageSearchWithFrequency
+	prefixKey := []byte(fmt.Sprintf("%s:", config.PageDataIndexName))
+
 	err := d.db.View(func(txn *badger.Txn) error {
 		opts := badger.DefaultIteratorOptions
+		opts.Prefix = prefixKey
 		it := txn.NewIterator(opts)
 		defer it.Close()
 
-		for it.Rewind(); it.Valid(); it.Next() {
+		for it.Seek(prefixKey); it.ValidForPrefix(prefixKey); it.Next() {
 			item := it.Item()
 			var page data.Page
-			err := item.Value(func(val []byte) error {
-				return json.Unmarshal(val, &page)
-			})
-			if err != nil {
+
+			if err := item.Value(func(val []byte) error {
+				return pageUnmarshal(val, &page)
+			}); err != nil {
 				return err
 			}
+
 			if freq, ok := page.Words[searchTerm]; ok {
 				pages = append(pages, data.PageSearchWithFrequency{
 					Url:       page.Url,
@@ -278,7 +305,7 @@ func (d Database) SearchByContent(searchTerm string) ([]data.PageSearchWithFrequ
 		return nil, err
 	}
 
-	// Ordenar por frequência
+	// Sort by frequency in descending order
 	sort.Slice(pages, func(i, j int) bool {
 		return pages[i].Frequency > pages[j].Frequency
 	})
@@ -286,33 +313,31 @@ func (d Database) SearchByContent(searchTerm string) ([]data.PageSearchWithFrequ
 	return pages, nil
 }
 
-// Search pesquisa páginas por título, descrição ou conteúdo
-func (d Database) Search(searchTerm string) ([]data.PageSearch, error) {
-	var pages []data.PageSearch
+// Search queries pages by title, description, or content.
+func (d Database) Search(searchTerm string) ([]data.Page, error) {
+	var pages []data.Page
+	prefixKey := []byte(fmt.Sprintf("%s:", config.PageDataIndexName))
+
 	err := d.db.View(func(txn *badger.Txn) error {
 		opts := badger.DefaultIteratorOptions
+		opts.Prefix = prefixKey
 		it := txn.NewIterator(opts)
 		defer it.Close()
 
-		for it.Rewind(); it.Valid(); it.Next() {
+		for it.Seek(prefixKey); it.ValidForPrefix(prefixKey); it.Next() {
 			item := it.Item()
 			var page data.Page
-			err := item.Value(func(val []byte) error {
-				return json.Unmarshal(val, &page)
-			})
-			if err != nil {
+
+			if err := item.Value(func(val []byte) error {
+				return pageUnmarshal(val, &page)
+			}); err != nil {
 				return err
 			}
+
 			if containsIgnoreCase(page.Title, searchTerm) ||
 				containsIgnoreCase(page.Description, searchTerm) ||
-				func() bool {
-					_, ok := page.Words[searchTerm]
-					return ok
-				}() {
-				pages = append(pages, data.PageSearch{
-					Url:   page.Url,
-					Title: page.Title,
-				})
+				containsWord(page.Words, searchTerm) {
+				pages = append(pages, page)
 			}
 		}
 		return nil
@@ -321,101 +346,8 @@ func (d Database) Search(searchTerm string) ([]data.PageSearch, error) {
 	return pages, err
 }
 
-// FILAS
-
-type Queue interface {
-	Enqueue(url string, depth int) error
-	Dequeue() (string, int, error)
-
-	Read() ([]data.QueueType, error)
-	Delete(url string) error
-}
-
-// Enqueue adds a URL to the queue.
-func (d Database) Enqueue(url string, depth int) error {
-	blockWrite.RLock()
-	defer blockWrite.RUnlock()
-	key := []byte(fmt.Sprintf("%s:%s", config.QueueName, url))
-	return d.db.Update(func(txn *badger.Txn) error {
-		return txn.Set(key, []byte(strconv.Itoa(depth)))
-	})
-}
-
-// Dequeue retrieves and removes a URL from the queue.
-func (d Database) Dequeue() (string, int, error) {
-	blockWrite.RLock()
-	defer blockWrite.RUnlock()
-
-	var url string
-	var depth int
-
-	err := d.db.Update(func(txn *badger.Txn) error {
-		opts := badger.DefaultIteratorOptions
-		opts.PrefetchValues = false // We don't need the values
-		it := txn.NewIterator(opts)
-		defer it.Close()
-
-		prefix := []byte(config.QueueName)
-		for it.Seek(prefix); it.ValidForPrefix(prefix); it.Next() {
-			item := it.Item()
-			url = string(item.KeyCopy(nil)) // Copy the key to avoid issues
-			item.Value(func(val []byte) error {
-				depth, _ = strconv.Atoi(string(val))
-				return nil
-			})
-			return txn.Delete(item.Key()) // Remove from queue after retrieval
-		}
-		return nil // No items in queue
-	})
-
-	if err != nil {
-		return "", 0, fmt.Errorf("error dequeuing from queue: %v", err)
-	}
-
-	if url != "" {
-		url = url[len(config.QueueName)+1:]
-	}
-
-	return url, depth, nil
-}
-
-// Read retrieves all URLs from the queue.
-func (d Database) Read() ([]data.QueueType, error) {
-	var urls []data.QueueType
-
-	err := d.db.View(func(txn *badger.Txn) error {
-		opts := badger.DefaultIteratorOptions
-		opts.PrefetchValues = true
-		it := txn.NewIterator(opts)
-		defer it.Close()
-
-		prefix := []byte(config.QueueName)
-		for it.Seek(prefix); it.ValidForPrefix(prefix); it.Next() {
-			item := it.Item()
-			url := string(item.KeyCopy(nil))
-			depth := 0
-			item.Value(func(val []byte) error {
-				depth, _ = strconv.Atoi(string(val))
-				return nil
-			})
-			urls = append(urls, data.QueueType{Url: url[len(config.QueueName)+1:], Depth: depth})
-		}
-		return nil
-	})
-
-	if err != nil {
-		return nil, fmt.Errorf("error reading from queue: %v", err)
-	}
-
-	return urls, nil
-}
-
-// Delete removes a URL from the queue.
-func (d Database) Delete(url string) error {
-	blockWrite.RLock()
-	defer blockWrite.RUnlock()
-	key := []byte(fmt.Sprintf("%s:%s", config.QueueName, url))
-	return d.db.Update(func(txn *badger.Txn) error {
-		return txn.Delete(key)
-	})
+// containsWord checks if a map contains a specific key.
+func containsWord(words map[string]int32, word string) bool {
+	_, ok := words[word]
+	return ok
 }

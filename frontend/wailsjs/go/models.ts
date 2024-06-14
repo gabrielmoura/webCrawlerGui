@@ -1,33 +1,5 @@
 export namespace types {
 	
-	export class CacheConfig {
-	    DBDir: string;
-	    Mode: string;
-	
-	    static createFrom(source: any = {}) {
-	        return new CacheConfig(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.DBDir = source["DBDir"];
-	        this.Mode = source["Mode"];
-	    }
-	}
-	export class Filter {
-	    tlds: string[];
-	    ignoreLocal: boolean;
-	
-	    static createFrom(source: any = {}) {
-	        return new Filter(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.tlds = source["tlds"];
-	        this.ignoreLocal = source["ignoreLocal"];
-	    }
-	}
 	export class JSResp {
 	    success: boolean;
 	    msg: string;
@@ -44,82 +16,18 @@ export namespace types {
 	        this.data = source["data"];
 	    }
 	}
-	export class PreferencesDecoder {
-	    name: string;
-	    enable: boolean;
-	    auto: boolean;
-	    decodePath: string;
-	    decodeArgs: string[];
-	    encodePath: string;
-	    encodeArgs: string[];
+	export class Paginated {
+	    limit: number;
+	    offset: number;
 	
 	    static createFrom(source: any = {}) {
-	        return new PreferencesDecoder(source);
+	        return new Paginated(source);
 	    }
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.name = source["name"];
-	        this.enable = source["enable"];
-	        this.auto = source["auto"];
-	        this.decodePath = source["decodePath"];
-	        this.decodeArgs = source["decodeArgs"];
-	        this.encodePath = source["encodePath"];
-	        this.encodeArgs = source["encodeArgs"];
-	    }
-	}
-	export class PreferencesCli {
-	    fontFamily: string[];
-	    fontSize: number;
-	    cursorStyle: string;
-	
-	    static createFrom(source: any = {}) {
-	        return new PreferencesCli(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.fontFamily = source["fontFamily"];
-	        this.fontSize = source["fontSize"];
-	        this.cursorStyle = source["cursorStyle"];
-	    }
-	}
-	export class PreferencesEditor {
-	    font: string;
-	    fontFamily: string[];
-	    fontSize: number;
-	    showLineNum: boolean;
-	    showFolding: boolean;
-	    dropText: boolean;
-	    links: boolean;
-	
-	    static createFrom(source: any = {}) {
-	        return new PreferencesEditor(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.font = source["font"];
-	        this.fontFamily = source["fontFamily"];
-	        this.fontSize = source["fontSize"];
-	        this.showLineNum = source["showLineNum"];
-	        this.showFolding = source["showFolding"];
-	        this.dropText = source["dropText"];
-	        this.links = source["links"];
-	    }
-	}
-	export class Proxy {
-	    enabled: boolean;
-	    proxyURL: string;
-	
-	    static createFrom(source: any = {}) {
-	        return new Proxy(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.enabled = source["enabled"];
-	        this.proxyURL = source["proxyURL"];
+	        this.limit = source["limit"];
+	        this.offset = source["offset"];
 	    }
 	}
 	export class PreferencesGeneral {
@@ -135,10 +43,12 @@ export namespace types {
 	    appName: string;
 	    timeFormat: string;
 	    timeZone: string;
-	    cache?: CacheConfig;
-	    proxy?: Proxy;
-	    filter?: Filter;
+	    tlds: string[];
+	    ignoreLocal: boolean;
+	    proxyEnabled: boolean;
+	    proxyURL: string;
 	    userAgent: string;
+	    enableProcessing: boolean;
 	
 	    static createFrom(source: any = {}) {
 	        return new PreferencesGeneral(source);
@@ -158,29 +68,13 @@ export namespace types {
 	        this.appName = source["appName"];
 	        this.timeFormat = source["timeFormat"];
 	        this.timeZone = source["timeZone"];
-	        this.cache = this.convertValues(source["cache"], CacheConfig);
-	        this.proxy = this.convertValues(source["proxy"], Proxy);
-	        this.filter = this.convertValues(source["filter"], Filter);
+	        this.tlds = source["tlds"];
+	        this.ignoreLocal = source["ignoreLocal"];
+	        this.proxyEnabled = source["proxyEnabled"];
+	        this.proxyURL = source["proxyURL"];
 	        this.userAgent = source["userAgent"];
+	        this.enableProcessing = source["enableProcessing"];
 	    }
-	
-		convertValues(a: any, classs: any, asMap: boolean = false): any {
-		    if (!a) {
-		        return a;
-		    }
-		    if (a.slice && a.map) {
-		        return (a as any[]).map(elem => this.convertValues(elem, classs));
-		    } else if ("object" === typeof a) {
-		        if (asMap) {
-		            for (const key of Object.keys(a)) {
-		                a[key] = new classs(a[key]);
-		            }
-		            return a;
-		        }
-		        return new classs(a);
-		    }
-		    return a;
-		}
 	}
 	export class PreferencesBehavior {
 	    welcomed: boolean;
@@ -211,9 +105,6 @@ export namespace types {
 	export class Preferences {
 	    behavior: PreferencesBehavior;
 	    general: PreferencesGeneral;
-	    editor: PreferencesEditor;
-	    cli: PreferencesCli;
-	    decoder: PreferencesDecoder[];
 	
 	    static createFrom(source: any = {}) {
 	        return new Preferences(source);
@@ -223,9 +114,6 @@ export namespace types {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.behavior = this.convertValues(source["behavior"], PreferencesBehavior);
 	        this.general = this.convertValues(source["general"], PreferencesGeneral);
-	        this.editor = this.convertValues(source["editor"], PreferencesEditor);
-	        this.cli = this.convertValues(source["cli"], PreferencesCli);
-	        this.decoder = this.convertValues(source["decoder"], PreferencesDecoder);
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -246,10 +134,6 @@ export namespace types {
 		    return a;
 		}
 	}
-	
-	
-	
-	
 	
 
 }

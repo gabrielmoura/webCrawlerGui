@@ -5,3 +5,8 @@ type JSResp struct {
 	Msg     string `json:"msg"`
 	Data    any    `json:"data,omitempty"`
 }
+
+type Paginated struct {
+	Limit  int `json:"limit"`
+	Offset int `json:"offset"`
+}

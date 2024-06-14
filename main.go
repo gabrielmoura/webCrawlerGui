@@ -1,8 +1,10 @@
 package main
 
 import (
+	"WebCrawlerGui/backend/infra/log"
 	"context"
 	"github.com/wailsapp/wails/v2"
+	"go.uber.org/zap"
 
 	"embed"
 	"runtime"
@@ -26,14 +28,19 @@ var assets embed.FS
 //go:embed build/appicon.png
 var icon []byte
 
-var version = "0.0.0"
+var version = "0.0.1"
 var AppName = "WebCrawlerGui"
 
 func main() {
+	err := log.InitLogger()
+	if err != nil {
+		panic(err)
+	}
+
 	// Create an instance of the app structure
 	srv := services.System()
 	crw := services.Crawling(AppName)
-	prefSvc := services.GetPreferences(AppName)
+	prefSvc := services.InitConfigService(AppName, version)
 
 	// menu
 	appMenu := menu.NewMenu()
@@ -49,7 +56,7 @@ func main() {
 	}
 
 	// Create application with options
-	err := wails.Run(&options.App{
+	err = wails.Run(&options.App{
 		Title:            AppName,
 		Width:            windowWidth,
 		Height:           windowHeight,
@@ -65,9 +72,13 @@ func main() {
 			Assets: assets,
 		},
 		BackgroundColour: &options.RGBA{R: 27, G: 38, B: 54, A: 1},
+		SingleInstanceLock: &options.SingleInstanceLock{
+			UniqueId:               "e3984e08-28dc-4e3d-b70a-45e961589cdc",
+			OnSecondInstanceLaunch: srv.OnSecondInstanceLaunch,
+		},
 		OnStartup: func(ctx context.Context) {
-			srv.Start(ctx, version)
-			crw.Start(ctx, services.Preferences)
+			srv.Start(ctx, version, AppName)
+			crw.Handle(ctx)
 		},
 		OnDomReady: func(ctx context.Context) {
 			x, y := prefSvc.GetWindowPosition(ctx)
@@ -77,6 +88,7 @@ func main() {
 		OnBeforeClose: func(ctx context.Context) (prevent bool) {
 			x, y := runtime2.WindowGetPosition(ctx)
 			prefSvc.SaveWindowPosition(x, y)
+			crw.HandleClose()
 			return false
 		},
 		Bind: []interface{}{
@@ -100,14 +112,14 @@ func main() {
 			DisableFramelessWindowDecorations: true,
 		},
 		Linux: &linux.Options{
-			ProgramName:      AppName,
-			Icon:             icon,
-			WebviewGpuPolicy: linux.WebviewGpuPolicyOnDemand,
-			// WindowIsTranslucent: true,
+			ProgramName:         AppName,
+			Icon:                icon,
+			WebviewGpuPolicy:    linux.WebviewGpuPolicyOnDemand,
+			WindowIsTranslucent: true,
 		},
 	})
 
 	if err != nil {
-		println("Error:", err.Error())
+		log.Logger.Panic("Error running Wails", zap.Error(err))
 	}
 }
