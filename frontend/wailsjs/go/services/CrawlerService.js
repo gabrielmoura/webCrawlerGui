@@ -30,6 +30,10 @@ export function Search(arg1) {
   return window['go']['services']['CrawlerService']['Search'](arg1);
 }
 
+export function SearchWords(arg1) {
+  return window['go']['services']['CrawlerService']['SearchWords'](arg1);
+}
+
 export function Start() {
   return window['go']['services']['CrawlerService']['Start']();
 }

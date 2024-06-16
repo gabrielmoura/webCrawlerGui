@@ -2,7 +2,18 @@ import {useMutation} from '@tanstack/react-query'
 import {createFileRoute} from '@tanstack/react-router'
 import {useState} from 'react'
 import {SearchService} from '../services/search'
-import {Box, Center, Flex, IconButton, Input, InputGroup, InputLeftAddon, Tooltip} from '@chakra-ui/react'
+import {
+    Box,
+    Center,
+    Flex,
+    IconButton,
+    Input,
+    InputGroup,
+    InputLeftAddon,
+    Spinner,
+    Table,
+    Tooltip
+} from '@chakra-ui/react'
 import {Search} from 'lucide-react'
 
 
@@ -16,7 +27,7 @@ function SearchPage() {
     const [data, setData] = useState<any>([])
     const mutSearch = useMutation({
         mutationKey: ['search', {searchString}],
-        mutationFn: (query: string) => SearchService.search(query),
+        mutationFn: (query: string) => SearchService.searchWords(query),
         onSuccess: (data) => {
             setData(data)
         }
@@ -39,19 +50,26 @@ function SearchPage() {
                         />
                     </InputGroup>
                     <Tooltip label='Buscar'>
-                        <IconButton aria-label='Search' icon={<Search/>} onClick={() => HandleSearch()}/>
+                        <IconButton aria-label='Search' icon={mutSearch.isPending ? <Spinner/> : <Search/>}
+                                    onClick={() => HandleSearch()}/>
                     </Tooltip>
                 </Center>
-                {data?.map((item: any) => (
-                    <tbody>
-                    <tr>
-                        <td>{item?.url}</td>
-                        <td>{item?.title}</td>
-                        <td>{item?.description}</td>
-                    </tr>
-                    </tbody>
-                ))
-                }
+                {mutSearch.isError && <div>Error</div>}
+                {mutSearch.isSuccess && (
+                    <Table>
+                        {data?.map((item: any) => (
+                            <tbody>
+                            <tr>
+                                <td>{item?.url}</td>
+                                <td>{item?.title}</td>
+                                <td>{item?.description}</td>
+                            </tr>
+                            </tbody>
+                        ))
+                        }
+                    </Table>
+                )}
+
 
             </Flex>
         </Box>

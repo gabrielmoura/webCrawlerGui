@@ -151,6 +151,26 @@ func (c CrawlerService) Search(args string) types.JSResp {
 		Data:    queue,
 	}
 }
+func (c CrawlerService) SearchWords(args []string) types.JSResp {
+	queue, err := db.DB.SearchWords(args)
+	if err != nil {
+		log.Logger.Error("Error searching queue", zap.Error(err))
+		return types.JSResp{
+			Success: false,
+			Msg:     "Error searching queue",
+		}
+	}
+	if len(queue) == 0 {
+		return types.JSResp{
+			Success: true,
+			Msg:     "There is no data to display",
+		}
+	}
+	return types.JSResp{
+		Success: true,
+		Data:    queue,
+	}
+}
 
 func Crawling(appName string) *CrawlerService {
 	db.InitDB(appName)

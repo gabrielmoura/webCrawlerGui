@@ -1,40 +1,6 @@
 import {StateCreator} from "zustand";
 import {types} from "../../../wailsjs/go/models";
-import {EventsEmit} from "../../../wailsjs/runtime";
-import {SaveWindowPosition, SaveWindowSize, SetPreferences} from "../../../wailsjs/go/services/ConfigService";
-// import {SaveWindowPosition, SaveWindowSize, SetPreferences} from "@wails/go/services/PreferencesService";
-// import {types} from "@wails/go/models";
-// import {EventsEmit} from "@wails/runtime";
-
-
-function SavePreferences(b: types.PreferencesBehavior) {
-    SetPreferences(types.Preferences.createFrom({
-        behavior: b
-    })).then((resp: types.JSResp) => {
-        console.log('SetPreferences', resp)
-    }).catch((err: any) => {
-        console.error('SetPreferences', err)
-    })
-
-}
-
-function SavePos(x: number, y: number) {
-    console.log('SavePos', x, y)
-    // WindowSetPosition(x, y)
-    SaveWindowPosition(x, y).then(() => {
-        console.log('SaveWindowPosition')
-    }).catch((err: any) => {
-        console.error('SaveWindowPosition', err)
-    })
-}
-
-function SetSize(width: number, height: number, maximised: boolean) {
-    SaveWindowSize(width, height, maximised).then(() => {
-        console.log('SaveWindowSize')
-    }).catch((err: any) => {
-        console.error('SaveWindowSize', err)
-    })
-}
+import {ConfigService} from "../../services/config.ts";
 
 
 interface BehaviorSlice {
@@ -78,8 +44,8 @@ export const createBehaviorSlice: StateCreator<
             b.windowPosX = x
             b.windowPosY = y
             // SavePreferences(b)
-            SavePos(x, y)
-            EventsEmit('window-move', {x: x, y: y})
+            ConfigService.SavePos(x, y)
+
             set({Behavior: b}, false, "window_pos")
         },
         setAsideWidth: (aside_width: number) => {
@@ -88,7 +54,7 @@ export const createBehaviorSlice: StateCreator<
                 return
             }
             b.asideWidth = aside_width
-            SavePreferences(b)
+            ConfigService.SavePreferences(b)
             set({Behavior: b}, false, "aside_width")
         },
         setWindow(width: number, height: number) {
@@ -96,8 +62,7 @@ export const createBehaviorSlice: StateCreator<
             if (!b) {
                 return
             }
-            SetSize(width, height, b.windowMaximised)
-            EventsEmit('window-resize', {width: width, height: height})
+            ConfigService.SetSize(width, height, b.windowMaximised)
             set({Behavior: b}, false, "window_size")
         },
         setWindowTheme(dark: boolean) {
@@ -106,7 +71,7 @@ export const createBehaviorSlice: StateCreator<
                 return
             }
             b.darkMode = dark
-            SavePreferences(b)
+            ConfigService.SavePreferences(b)
             set({Behavior: b}, false, "window_theme")
         },
         updateBehavior(Behavior?: types.PreferencesBehavior) {

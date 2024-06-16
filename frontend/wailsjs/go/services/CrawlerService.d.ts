@@ -17,6 +17,8 @@ export function HandleClose():Promise<void>;
 
 export function Search(arg1:string):Promise<types.JSResp>;
 
+export function SearchWords(arg1:Array<string>):Promise<types.JSResp>;
+
 export function Start():Promise<types.JSResp>;
 
 export function Stop():Promise<types.JSResp>;

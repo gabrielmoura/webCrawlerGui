@@ -157,20 +157,24 @@ func (d Database) GetFromQueueV2(getNumber int) ([]data.QueueType, error) {
 func (d Database) WritePage(page *data.Page) error {
 	blockWrite.RLock()
 	defer blockWrite.RUnlock()
+	Key := []byte(fmt.Sprintf("%s:%s", config.PageDataIndexName, page.Url))
+
 	return d.db.Update(func(txn *badger.Txn) error {
 		bytes, err := pageMarshal(page)
 		if err != nil {
 			return err
 		}
-		return txn.Set([]byte(page.Url), bytes)
+		return txn.Set(Key, bytes)
 	})
 }
 
 // ReadPage recupera uma página do banco de dados por URL
 func (d Database) ReadPage(url string) (*data.Page, error) {
 	var page data.Page
+	Key := []byte(fmt.Sprintf("%s:%s", config.PageDataIndexName, url))
+
 	err := d.db.View(func(txn *badger.Txn) error {
-		item, err := txn.Get([]byte(url))
+		item, err := txn.Get(Key)
 		if err != nil {
 			return err
 		}
@@ -333,11 +337,42 @@ func (d Database) Search(searchTerm string) ([]data.Page, error) {
 			}); err != nil {
 				return err
 			}
-
 			if containsIgnoreCase(page.Title, searchTerm) ||
 				containsIgnoreCase(page.Description, searchTerm) ||
 				containsWord(page.Words, searchTerm) {
 				pages = append(pages, page)
+			}
+		}
+		return nil
+	})
+
+	return pages, err
+}
+
+func (d Database) SearchWords(searchTerms []string) ([]data.Page, error) {
+	var pages []data.Page
+	prefixKey := []byte(fmt.Sprintf("%s:", config.PageDataIndexName))
+
+	err := d.db.View(func(txn *badger.Txn) error {
+		opts := badger.DefaultIteratorOptions
+		opts.Prefix = prefixKey
+		it := txn.NewIterator(opts)
+		defer it.Close()
+
+		for it.Seek(prefixKey); it.ValidForPrefix(prefixKey); it.Next() {
+			item := it.Item()
+			var page data.Page
+
+			if err := item.Value(func(val []byte) error {
+				return pageUnmarshal(val, &page)
+			}); err != nil {
+				return err
+			}
+
+			for _, search := range searchTerms {
+				if containsWord(page.Words, search) {
+					pages = append(pages, page)
+				}
 			}
 		}
 		return nil
