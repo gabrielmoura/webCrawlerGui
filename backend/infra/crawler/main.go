@@ -103,6 +103,7 @@ func HandleQueue(initialURL string) {
 }
 
 func LoopQueue() {
+	go db.DB.OptimizeCache(5)
 	for {
 		if config.Conf.General.EnableProcessing {
 			links, err := db.DB.GetFromQueueV2(config.Conf.General.MaxConcurrency) // Get a batch of links
