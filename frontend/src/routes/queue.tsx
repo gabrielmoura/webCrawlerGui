@@ -79,7 +79,7 @@ function ShowQueueList() {
             footer: info => info.column.id,
         }),
         columnHelper.accessor('depth', {
-            id: 'group',
+            id: 'depth',
             cell: info => <i>{info.getValue()}</i>,
             header: () => <span>Depth</span>,
             footer: info => info.column.id,
@@ -148,7 +148,7 @@ function ShowQueueList() {
                             {table.getRowModel().rows.map(row => (
                                 <Tr key={row.id}>
                                     {row.getVisibleCells().map(cell => (
-                                        <Td key={cell.id}>
+                                        <Td key={cell.id} maxW={'70vw'}>
                                             {flexRender(
                                                 cell.column.columnDef.cell,
                                                 cell.getContext()
@@ -159,40 +159,42 @@ function ShowQueueList() {
                             ))}
                         </Tbody>
                     </Table>
-                    <Flex gap={5}>
-                        <IconButton
-                            className="border rounded p-1"
-                            onClick={() => table.firstPage()}
-                            disabled={!table.getCanPreviousPage()}
-                            aria-label='Primeiro'
-                            icon={<ArrowLeftToLine/>}
-                        />
-                        <IconButton
-                            className="border rounded p-1"
-                            onClick={() => table.previousPage()}
-                            disabled={!table.getCanPreviousPage()}
-                            aria-label='Voltar'
-                            icon={<ArrowLeft/>}
-                        />
-                        <Text w={170} h={10}>
-                            {table.getState().pagination.pageIndex + 1} of{' '}
-                            {table.getPageCount().toLocaleString()} of {table.getRowCount().toLocaleString()} Rows
-                        </Text>
-                        <IconButton
-                            className="border rounded p-1"
-                            onClick={() => table.nextPage()}
-                            disabled={!table.getCanNextPage()}
-                            icon={<ArrowRight/>}
-                            aria-label='Avançar'
-                        />
-                        <IconButton
-                            className="border rounded p-1"
-                            onClick={() => table.lastPage()}
-                            disabled={!table.getCanNextPage()}
-                            icon={<ArrowRightToLine/>}
-                            aria-label='Último'
-                        />
-                    </Flex>
+                    <Center>
+                        <Flex gap={5}>
+                            <IconButton
+                                className="border rounded p-1"
+                                onClick={() => table.firstPage()}
+                                disabled={!table.getCanPreviousPage()}
+                                aria-label='Primeiro'
+                                icon={<ArrowLeftToLine/>}
+                            />
+                            <IconButton
+                                className="border rounded p-1"
+                                onClick={() => table.previousPage()}
+                                disabled={!table.getCanPreviousPage()}
+                                aria-label='Voltar'
+                                icon={<ArrowLeft/>}
+                            />
+                            <Text w={170} h={10}>
+                                {table.getState().pagination.pageIndex + 1} of{' '}
+                                {table.getPageCount().toLocaleString()} of {table.getRowCount().toLocaleString()} Rows
+                            </Text>
+                            <IconButton
+                                className="border rounded p-1"
+                                onClick={() => table.nextPage()}
+                                disabled={!table.getCanNextPage()}
+                                icon={<ArrowRight/>}
+                                aria-label='Avançar'
+                            />
+                            <IconButton
+                                className="border rounded p-1"
+                                onClick={() => table.lastPage()}
+                                disabled={!table.getCanNextPage()}
+                                icon={<ArrowRightToLine/>}
+                                aria-label='Último'
+                            />
+                        </Flex>
+                    </Center>
 
                 </TableContainer>
             </Flex>

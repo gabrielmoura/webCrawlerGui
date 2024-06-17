@@ -12,7 +12,8 @@ import {
     VStack
 } from "@chakra-ui/react";
 import {Link} from "@tanstack/react-router";
-import imageLogo from "../assets/images/logo-universal.png";
+
+import imageLogo from "../assets/images/2-bg.png";
 import React, {useState} from "react";
 import {Bolt, EyeOff, Menu, Rows4, Search} from "lucide-react";
 import {PlayCrawler} from "./PlayCrawler.tsx";
@@ -73,23 +74,11 @@ export function FRootLayout({children}: FRootLayoutProps) {
                             <Tooltip label='Fechar SideBar'>
                                 <IconButton icon={<Menu/>} aria-label="Menu" onClick={() => setNavHide(old => !old)}/>
                             </Tooltip>
-                            <Text fontSize="xl" fontWeight="bold" ml={4}>Constellation</Text>
+                            <Text fontSize="xl" fontWeight="bold" ml={4}>WebCrawler</Text>
                             <Spacer/>
                             <PlayCrawler/>
 
                             <ToggleTheme/>
-
-                            {/*<ButtonGroup aria-label="Settings" mx={1}>*/}
-                            {/*    <Tooltip label='Settings'>*/}
-                            {/*        <Bolt/>*/}
-                            {/*    </Tooltip>*/}
-                            {/*</ButtonGroup>*/}
-
-                            {/*<ButtonGroup aria-label="Logout" mx={1}>*/}
-                            {/*    <Tooltip label='Logout'>*/}
-                            {/*        <LogOut/>*/}
-                            {/*    </Tooltip>*/}
-                            {/*</ButtonGroup>*/}
 
                             <ButtonGroup aria-label="Logout" mx={1} onClick={() => Hide()}>
                                 <Tooltip label='Ocultar para a bandeja'>
