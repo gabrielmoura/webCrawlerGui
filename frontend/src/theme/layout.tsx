@@ -1,23 +1,10 @@
-import {
-    Box,
-    ButtonGroup,
-    Center,
-    Divider,
-    Flex,
-    IconButton,
-    Image,
-    Spacer,
-    Text,
-    Tooltip,
-    useColorMode,
-    VStack
-} from "@chakra-ui/react";
+import {Box, Center, Divider, Flex, IconButton, Image, Spacer, Text, Tooltip, VStack} from "@chakra-ui/react";
 import {Link} from "@tanstack/react-router";
 import imageLogo from "../assets/images/logo-universal.png";
 import React, {useState} from "react";
-import {Bolt, LogOut, Menu, Moon, Rows4, Search, Sun} from "lucide-react";
-import useAppStore from "../store/appStore";
+import {Bolt, Menu, Rows4, Search} from "lucide-react";
 import {PlayCrawler} from "./PlayCrawler.tsx";
+import {ToggleTheme} from "./ToggleTheme.tsx";
 
 interface FRootLayoutProps {
     children?: React.ReactNode;
@@ -27,13 +14,6 @@ export function FRootLayout({children}: FRootLayoutProps) {
     const [navHide, setNavHide] = useState(false)
     const iconStyle = {
         marginTop: '2px',
-    }
-    const setWTheme = useAppStore(s => s.setWindowTheme)
-    const {colorMode, toggleColorMode} = useColorMode();
-
-    function toggleCTheme() {
-        toggleColorMode()
-        setWTheme(colorMode == 'dark')
     }
 
     return (
@@ -75,7 +55,7 @@ export function FRootLayout({children}: FRootLayoutProps) {
                     </Box> : null}
 
 
-                    <Box flex="1" bg="gray.suave" overflow="auto" >
+                    <Box flex="1" bg="gray.suave" overflow="auto">
                         <Flex p={4} alignItems="center" pb={1} maxH={'10vh'}>
                             <Tooltip label='Fechar SideBar'>
                                 <IconButton icon={<Menu/>} aria-label="Menu" onClick={() => setNavHide(old => !old)}/>
@@ -84,23 +64,19 @@ export function FRootLayout({children}: FRootLayoutProps) {
                             <Spacer/>
                             <PlayCrawler/>
 
-                            <ButtonGroup aria-label="Theme" mx={1} onClick={() => toggleCTheme()}>
-                                <Tooltip label='Theme'>
-                                    {colorMode == 'dark' ? <Sun/> : <Moon/>}
-                                </Tooltip>
-                            </ButtonGroup>
+                            <ToggleTheme/>
 
-                            <ButtonGroup aria-label="Settings" mx={1}>
-                                <Tooltip label='Settings'>
-                                    <Bolt/>
-                                </Tooltip>
-                            </ButtonGroup>
+                            {/*<ButtonGroup aria-label="Settings" mx={1}>*/}
+                            {/*    <Tooltip label='Settings'>*/}
+                            {/*        <Bolt/>*/}
+                            {/*    </Tooltip>*/}
+                            {/*</ButtonGroup>*/}
 
-                            <ButtonGroup aria-label="Logout" mx={1}>
-                                <Tooltip label='Logout'>
-                                    <LogOut/>
-                                </Tooltip>
-                            </ButtonGroup>
+                            {/*<ButtonGroup aria-label="Logout" mx={1}>*/}
+                            {/*    <Tooltip label='Logout'>*/}
+                            {/*        <LogOut/>*/}
+                            {/*    </Tooltip>*/}
+                            {/*</ButtonGroup>*/}
 
                         </Flex>
                         <Divider color='white'/>

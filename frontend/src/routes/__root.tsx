@@ -1,12 +1,12 @@
-import { createRootRouteWithContext, Outlet, } from '@tanstack/react-router'
-import { TanStackRouterDevtools } from '@tanstack/router-devtools'
-import { QueryClient } from '@tanstack/react-query'
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
-import { FRootLayout } from '../theme/layout'
+import {createRootRouteWithContext, Outlet,} from '@tanstack/react-router'
+import {TanStackRouterDevtools} from '@tanstack/router-devtools'
+import {QueryClient} from '@tanstack/react-query'
+import {ReactQueryDevtools} from '@tanstack/react-query-devtools'
+import {FRootLayout} from '../theme/layout'
 import {useEffect} from "react";
 import {types} from "../../wailsjs/go/models.ts";
 import useAppStore from "../store/appStore.ts";
-import {GetPreferences} from "../../wailsjs/go/services/ConfigService";
+import {ConfigService} from "../services/config.ts";
 
 export const Route = createRootRouteWithContext<{
     queryClient: QueryClient
@@ -22,15 +22,10 @@ function RootComponent() {
         //     console.log('window_changed', event)
         // })
 
-        GetPreferences().then((resp: types.JSResp) => {
+        ConfigService.Get().then((resp: types.Preferences) => {
                 console.log('GetPreferences', resp)
-                if (resp.success) {
-                    let d = resp.data as types.Preferences
-                    console.log('GetPreferences', d.behavior)
-                    d.behavior.welcomed = true
-                    upB(d.behavior)
-                    upG(d.general)
-                }
+                upB(resp.behavior)
+                upG(resp.general)
             }
         ).catch((err: any) => {
             console.error('GetPreferences', err)
@@ -41,12 +36,12 @@ function RootComponent() {
     return (
         <>
             <FRootLayout>
-                <Outlet />
+                <Outlet/>
             </FRootLayout>
             {import.meta.env.DEV ?
                 <>
-                    <ReactQueryDevtools buttonPosition="bottom-left" />
-                    <TanStackRouterDevtools position="bottom-right" />
+                    <ReactQueryDevtools buttonPosition="bottom-left"/>
+                    <TanStackRouterDevtools position="bottom-right"/>
                 </>
                 : null}
         </>

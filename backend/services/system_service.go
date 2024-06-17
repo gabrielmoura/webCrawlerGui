@@ -3,6 +3,7 @@ package services
 import (
 	"WebCrawlerGui/backend/config"
 	"WebCrawlerGui/backend/consts"
+	"WebCrawlerGui/backend/infra/db"
 	"WebCrawlerGui/backend/infra/log"
 	"WebCrawlerGui/backend/types"
 	"context"
@@ -12,6 +13,7 @@ import (
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 	"go.uber.org/zap"
 	"net/http"
+	"os"
 	runtime2 "runtime"
 	"strings"
 	"sync"
@@ -169,4 +171,47 @@ func (a *SystemService) CheckForUpdate() (resp types.JSResp) {
 		"page_url": respObj.HtmlUrl,
 	}
 	return
+}
+
+func (a *SystemService) ExportData() types.JSResp {
+	saveDialogOptions := runtime.SaveDialogOptions{
+		Title:           "Export data",
+		DefaultFilename: "data.json",
+		Filters:         []runtime.FileFilter{{DisplayName: "JSON Files", Pattern: "*.json"}},
+	}
+	filename, err := runtime.SaveFileDialog(a.ctx, saveDialogOptions)
+	if err != nil {
+		log.Logger.Error("Error saving file", zap.Error(err))
+		return types.JSResp{
+			Success: false,
+			Msg:     "Error saving file",
+		}
+	}
+
+	data, err := db.DB.GetAllPage()
+	if err != nil {
+		return types.JSResp{
+			Success: false,
+			Msg:     "Error getting data",
+		}
+	}
+	jsonData, err := json.MarshalIndent(data, "", "  ")
+	if err != nil {
+		return types.JSResp{
+			Success: false,
+			Msg:     "Error exporting data",
+		}
+	}
+
+	err = os.WriteFile(filename, jsonData, 0644)
+	if err != nil {
+		return types.JSResp{
+			Success: false,
+			Msg:     "Error exporting data",
+		}
+	}
+	return types.JSResp{
+		Success: true,
+		Msg:     "Data exported",
+	}
 }

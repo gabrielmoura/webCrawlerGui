@@ -381,6 +381,33 @@ func (d Database) SearchWords(searchTerms []string) ([]data.Page, error) {
 	return pages, err
 }
 
+func (d Database) GetAllPage() ([]data.Page, error) {
+	var pages []data.Page
+	prefixKey := []byte(fmt.Sprintf("%s:", config.PageDataIndexName))
+
+	err := d.db.View(func(txn *badger.Txn) error {
+		opts := badger.DefaultIteratorOptions
+		opts.Prefix = prefixKey
+		it := txn.NewIterator(opts)
+		defer it.Close()
+
+		for it.Seek(prefixKey); it.ValidForPrefix(prefixKey); it.Next() {
+			item := it.Item()
+			var page data.Page
+
+			if err := item.Value(func(val []byte) error {
+				return pageUnmarshal(val, &page)
+			}); err != nil {
+				return err
+			}
+			pages = append(pages, page)
+		}
+		return nil
+	})
+
+	return pages, err
+}
+
 // containsWord checks if a map contains a specific key.
 func containsWord(words map[string]int32, word string) bool {
 	_, ok := words[word]

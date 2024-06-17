@@ -1,12 +1,25 @@
 import {types} from "../../wailsjs/go/models.ts";
-import {SaveWindowPosition, SaveWindowSize, SetPreferences} from "../../wailsjs/go/services/ConfigService";
+import {
+    GetPreferences,
+    SaveWindowPosition,
+    SaveWindowSize,
+    SetPreferences
+} from "../../wailsjs/go/services/ConfigService";
 import {EventsEmit} from "../../wailsjs/runtime";
 
-export class ConfigService{
+export class ConfigService {
     static SavePreferences(b: types.PreferencesBehavior) {
         SetPreferences(types.Preferences.createFrom({
             behavior: b
         })).then((resp: types.JSResp) => {
+            console.log('SetPreferences', resp)
+        }).catch((err: any) => {
+            console.error('SetPreferences', err)
+        })
+
+    }
+    static SaveAllPreferences(g: types.Preferences) {
+        SetPreferences(types.Preferences.createFrom(g)).then((resp: types.JSResp) => {
             console.log('SetPreferences', resp)
         }).catch((err: any) => {
             console.error('SetPreferences', err)
@@ -33,5 +46,13 @@ export class ConfigService{
         }).catch((err: any) => {
             console.error('SaveWindowSize', err)
         })
+    }
+
+    static async Get(): Promise<types.Preferences> {
+        const res = await GetPreferences();
+        if (res.success) {
+            return Promise.resolve(res.data)
+        }
+        return Promise.reject(res.msg)
     }
 }

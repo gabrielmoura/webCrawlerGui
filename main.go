@@ -4,6 +4,7 @@ import (
 	"WebCrawlerGui/backend/infra/log"
 	"context"
 	"github.com/wailsapp/wails/v2"
+	"github.com/wailsapp/wails/v2/pkg/logger"
 	"go.uber.org/zap"
 
 	"embed"
@@ -68,6 +69,7 @@ func main() {
 		Menu:                     appMenu,
 		EnableDefaultContextMenu: true,
 		StartHidden:              true,
+		LogLevel:                 logger.DEBUG,
 		AssetServer: &assetserver.Options{
 			Assets: assets,
 		},

@@ -6,6 +6,8 @@ import {context} from '../models';
 
 export function CheckForUpdate():Promise<types.JSResp>;
 
+export function ExportData():Promise<types.JSResp>;
+
 export function Info():Promise<types.JSResp>;
 
 export function OnSecondInstanceLaunch(arg1:options.SecondInstanceData):Promise<void>;

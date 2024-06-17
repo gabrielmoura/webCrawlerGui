@@ -1,4 +1,4 @@
-import {IconButton} from "@chakra-ui/react";
+import {IconButton, Tooltip} from "@chakra-ui/react";
 import {CirclePause, CirclePlay} from "lucide-react";
 import {useMutation} from "@tanstack/react-query";
 import useAppStore from "../store/appStore.ts";
@@ -17,12 +17,14 @@ export function PlayCrawler() {
         },
     })
     return (
-        <IconButton
-            aria-label={'Play Crawler'}
-            icon={enableProcessing ? <CirclePause/> : <CirclePlay/>}
-            variant={'outline'}
-            colorScheme={'green'}
-            onClick={() => mutate.mutate()}
-        />
+        <Tooltip label={enableProcessing ? "Pausar" : "Iniciar"}>
+            <IconButton
+                aria-label={'Play Crawler'}
+                icon={enableProcessing ? <CirclePause/> : <CirclePlay/>}
+                variant={'outline'}
+                colorScheme={'green'}
+                onClick={() => mutate.mutate()}
+            />
+        </Tooltip>
     )
 }

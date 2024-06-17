@@ -12,9 +12,14 @@ import {
     InputLeftAddon,
     Spinner,
     Table,
-    Tooltip
+    Tbody,
+    Td,
+    Thead,
+    Tooltip,
+    Tr
 } from '@chakra-ui/react'
 import {Search} from 'lucide-react'
+import {LinkExternal} from "../theme/LinkExternal.tsx";
 
 
 export const Route = createFileRoute('/')({
@@ -39,6 +44,13 @@ function SearchPage() {
         }
     }
 
+    function handleEnter(e: any) {
+        if (e.key === 'Enter') {
+            HandleSearch()
+        }
+    }
+
+
     return (
         <Box>
             <Flex gap='2' direction={'column'}>
@@ -47,6 +59,7 @@ function SearchPage() {
                         <InputLeftAddon>Search</InputLeftAddon>
                         <Input type='text' placeholder='Search on scrawler'
                                onChange={(e) => setSearch(e.target.value)}
+                               onKeyDown={handleEnter}
                         />
                     </InputGroup>
                     <Tooltip label='Buscar'>
@@ -57,14 +70,23 @@ function SearchPage() {
                 {mutSearch.isError && <div>Error</div>}
                 {mutSearch.isSuccess && (
                     <Table>
+                        <Thead>
+                            <Tr>
+                                <Td>URL</Td>
+                                <Td>Título</Td>
+                                <Td>Descrição</Td>
+                            </Tr>
+                        </Thead>
                         {data?.map((item: any) => (
-                            <tbody>
-                            <tr>
-                                <td>{item?.url}</td>
-                                <td>{item?.title}</td>
-                                <td>{item?.description}</td>
-                            </tr>
-                            </tbody>
+                            <Tbody>
+                                <Tr>
+                                    <Td>
+                                        <LinkExternal url={item?.url}/>
+                                    </Td>
+                                    <Td>{item?.title}</Td>
+                                    <Td>{item?.description}</Td>
+                                </Tr>
+                            </Tbody>
                         ))
                         }
                     </Table>

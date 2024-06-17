@@ -6,6 +6,10 @@ export function CheckForUpdate() {
   return window['go']['services']['SystemService']['CheckForUpdate']();
 }
 
+export function ExportData() {
+  return window['go']['services']['SystemService']['ExportData']();
+}
+
 export function Info() {
   return window['go']['services']['SystemService']['Info']();
 }
