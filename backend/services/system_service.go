@@ -83,8 +83,6 @@ func (s *SystemService) Start(ctx context.Context, version string, appName strin
 	s.appVersion = version
 	s.appName = appName
 
-	systray.Run(onReadySystray(ctx, appIcon), onExitSystray)
-
 	// maximize the window if screen size is lower than the minimum window size
 	if screen, err := runtime.ScreenGetAll(ctx); err == nil && len(screen) > 0 {
 		for _, sc := range screen {
@@ -96,6 +94,16 @@ func (s *SystemService) Start(ctx context.Context, version string, appName strin
 			}
 		}
 	}
+	runtime.EventsOn(s.ctx, "start", func(optionalData ...interface{}) {
+		config.Conf.General.EnableProcessing = true
+		config.Conf.SaveFileConfig()
+	})
+	runtime.EventsOn(s.ctx, "pause", func(optionalData ...interface{}) {
+		config.Conf.General.EnableProcessing = false
+		config.Conf.SaveFileConfig()
+	})
+
+	go systray.Run(onReadySystray(ctx, appIcon), onExitSystray)
 }
 
 func (s *SystemService) Info() (resp types.JSResp) {

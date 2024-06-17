@@ -43,7 +43,6 @@ export const createBehaviorSlice: StateCreator<
             }
             b.windowPosX = x
             b.windowPosY = y
-            // SavePreferences(b)
             ConfigService.SavePos(x, y)
 
             set({Behavior: b}, false, "window_pos")
@@ -54,7 +53,6 @@ export const createBehaviorSlice: StateCreator<
                 return
             }
             b.asideWidth = aside_width
-            ConfigService.SavePreferences(b)
             set({Behavior: b}, false, "aside_width")
         },
         setWindow(width: number, height: number) {
@@ -71,7 +69,6 @@ export const createBehaviorSlice: StateCreator<
                 return
             }
             b.darkMode = dark
-            ConfigService.SavePreferences(b)
             set({Behavior: b}, false, "window_theme")
         },
         updateBehavior(Behavior?: types.PreferencesBehavior) {
