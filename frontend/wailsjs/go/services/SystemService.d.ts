@@ -12,4 +12,4 @@ export function Info():Promise<types.JSResp>;
 
 export function OnSecondInstanceLaunch(arg1:options.SecondInstanceData):Promise<void>;
 
-export function Start(arg1:context.Context,arg2:string,arg3:string):Promise<void>;
+export function Start(arg1:context.Context,arg2:string,arg3:string,arg4:Array<number>):Promise<void>;

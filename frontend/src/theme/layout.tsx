@@ -1,10 +1,23 @@
-import {Box, Center, Divider, Flex, IconButton, Image, Spacer, Text, Tooltip, VStack} from "@chakra-ui/react";
+import {
+    Box,
+    ButtonGroup,
+    Center,
+    Divider,
+    Flex,
+    IconButton,
+    Image,
+    Spacer,
+    Text,
+    Tooltip,
+    VStack
+} from "@chakra-ui/react";
 import {Link} from "@tanstack/react-router";
 import imageLogo from "../assets/images/logo-universal.png";
 import React, {useState} from "react";
-import {Bolt, Menu, Rows4, Search} from "lucide-react";
+import {Bolt, EyeOff, Menu, Rows4, Search} from "lucide-react";
 import {PlayCrawler} from "./PlayCrawler.tsx";
 import {ToggleTheme} from "./ToggleTheme.tsx";
+import {Hide} from "../../wailsjs/runtime";
 
 interface FRootLayoutProps {
     children?: React.ReactNode;
@@ -77,6 +90,12 @@ export function FRootLayout({children}: FRootLayoutProps) {
                             {/*        <LogOut/>*/}
                             {/*    </Tooltip>*/}
                             {/*</ButtonGroup>*/}
+
+                            <ButtonGroup aria-label="Logout" mx={1} onClick={() => Hide()}>
+                                <Tooltip label='Ocultar para a bandeja'>
+                                    <EyeOff/>
+                                </Tooltip>
+                            </ButtonGroup>
 
                         </Flex>
                         <Divider color='white'/>

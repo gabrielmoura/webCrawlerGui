@@ -39,9 +39,9 @@ func main() {
 	}
 
 	// Create an instance of the app structure
+	prefSvc := services.InitConfigService(AppName, version)
 	srv := services.System()
 	crw := services.Crawling(AppName)
-	prefSvc := services.InitConfigService(AppName, version)
 
 	// menu
 	appMenu := menu.NewMenu()
@@ -79,7 +79,7 @@ func main() {
 			OnSecondInstanceLaunch: srv.OnSecondInstanceLaunch,
 		},
 		OnStartup: func(ctx context.Context) {
-			srv.Start(ctx, version, AppName)
+			srv.Start(ctx, version, AppName, icon)
 			crw.Handle(ctx)
 		},
 		OnDomReady: func(ctx context.Context) {

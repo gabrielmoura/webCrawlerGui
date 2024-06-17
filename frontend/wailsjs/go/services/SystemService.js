@@ -18,6 +18,6 @@ export function OnSecondInstanceLaunch(arg1) {
   return window['go']['services']['SystemService']['OnSecondInstanceLaunch'](arg1);
 }
 
-export function Start(arg1, arg2, arg3) {
-  return window['go']['services']['SystemService']['Start'](arg1, arg2, arg3);
+export function Start(arg1, arg2, arg3, arg4) {
+  return window['go']['services']['SystemService']['Start'](arg1, arg2, arg3, arg4);
 }

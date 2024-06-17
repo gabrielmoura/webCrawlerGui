@@ -3,6 +3,7 @@ module WebCrawlerGui
 go 1.22.2
 
 require (
+	fyne.io/systray v1.10.0
 	github.com/dgraph-io/badger/v4 v4.2.0
 	github.com/golang/protobuf v1.5.2
 	github.com/vrischmann/userdir v0.0.0-20151206171402-20f291cebd68
@@ -40,6 +41,7 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/rivo/uniseg v0.4.4 // indirect
 	github.com/samber/lo v1.38.1 // indirect
+	github.com/tevino/abool v1.2.0 // indirect
 	github.com/tkrajina/go-reflector v0.5.6 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.2 // indirect

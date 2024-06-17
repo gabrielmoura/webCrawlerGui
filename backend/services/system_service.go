@@ -9,6 +9,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"fyne.io/systray"
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 	"go.uber.org/zap"
@@ -46,10 +47,43 @@ func System() *SystemService {
 	}
 	return system
 }
-func (s *SystemService) Start(ctx context.Context, version string, appName string) {
+func onReadySystray(ctx context.Context, appIcon []byte) func() {
+	return func() {
+		systray.SetTemplateIcon(appIcon, appIcon)
+		systray.SetTitle("Web Crawler")
+		systray.SetTooltip("Web Crawler")
+		mStart := systray.AddMenuItem("Iniciar", "Iniciar a aplicação")
+		mPause := systray.AddMenuItem("Pausar", "Pausar a aplicação")
+		systray.AddSeparator()
+		mRestore := systray.AddMenuItem("Restaurar", "Restaurar configurações padrão")
+		mQuit := systray.AddMenuItem("Fechar", "Fechar a aplicação")
+		go func() {
+			for {
+				select {
+				case <-mQuit.ClickedCh:
+					runtime.Quit(ctx)
+					systray.Quit()
+				case <-mPause.ClickedCh:
+					runtime.EventsEmit(ctx, "pause")
+				case <-mRestore.ClickedCh:
+					runtime.Show(ctx)
+				case <-mStart.ClickedCh:
+					runtime.EventsEmit(ctx, "start")
+				}
+			}
+		}()
+	}
+}
+func onExitSystray() {
+	fmt.Println("Exiting...")
+}
+
+func (s *SystemService) Start(ctx context.Context, version string, appName string, appIcon []byte) {
 	s.ctx = ctx
 	s.appVersion = version
 	s.appName = appName
+
+	systray.Run(onReadySystray(ctx, appIcon), onExitSystray)
 
 	// maximize the window if screen size is lower than the minimum window size
 	if screen, err := runtime.ScreenGetAll(ctx); err == nil && len(screen) > 0 {
