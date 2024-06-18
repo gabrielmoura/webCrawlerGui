@@ -109,10 +109,11 @@ func LoopQueue() {
 			links, err := db.DB.GetFromQueueV2(config.Conf.General.MaxConcurrency) // Get a batch of links
 			if err != nil {
 				log.Logger.Error("Error getting from queue", zap.Error(err))
+				break
 			}
 			if len(links) == 0 {
 				log.Logger.Info("Queue is empty", zap.Any("Links", links))
-				break
+				continue
 			}
 
 			for _, link := range links {

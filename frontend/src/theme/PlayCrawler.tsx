@@ -3,8 +3,10 @@ import {CirclePause, CirclePlay} from "lucide-react";
 import {useMutation} from "@tanstack/react-query";
 import useAppStore from "../store/appStore.ts";
 import {QueueService} from "../services/queue.ts";
+import {useTranslation} from "react-i18next";
 
 export function PlayCrawler() {
+    const {t} = useTranslation();
     const enableProcessing = useAppStore(s => s.General?.enableProcessing)
     const setEnableProcessing = useAppStore(s => s.setEnableProcessing)
 
@@ -17,9 +19,9 @@ export function PlayCrawler() {
         },
     })
     return (
-        <Tooltip label={enableProcessing ? "Pausar" : "Iniciar"}>
+        <Tooltip label={enableProcessing ? t('btn.pause') : t('btn.start')}>
             <IconButton
-                aria-label={'Play Crawler'}
+                aria-label={t('btn.start')}
                 icon={enableProcessing ? <CirclePause/> : <CirclePlay/>}
                 variant={'outline'}
                 colorScheme={'green'}

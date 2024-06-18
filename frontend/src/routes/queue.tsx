@@ -30,12 +30,14 @@ import {
     PaginationState,
     useReactTable
 } from '@tanstack/react-table';
+import {useTranslation} from "react-i18next";
 
 export const Route = createFileRoute('/queue')({
     component: ShowQueueList
 })
 
 function ShowQueueList() {
+    const {t} = useTranslation();
     const [url, setUrl] = useState<string>('')
     const client = useQueryClient()
     const {data} = useQuery({
@@ -81,17 +83,17 @@ function ShowQueueList() {
         columnHelper.accessor('depth', {
             id: 'depth',
             cell: info => <i>{info.getValue()}</i>,
-            header: () => <span>Depth</span>,
+            header: () => <span>{t('depth')}</span>,
             footer: info => info.column.id,
         }),
         // Actions
         columnHelper.accessor('url', {
-            header: 'Actions',
-            footer: 'Actions',
+            header: t('actions'),
+            footer: t('actions'),
             cell: info => (
                 <IconButton
                     onClick={() => handleDeleteFromQueue(info.getValue())}
-                    aria-label='Delete'
+                    aria-label={t('btn.delete')}
                     icon={<CircleX/>}
                 />
             ),
@@ -115,15 +117,16 @@ function ShowQueueList() {
 
     return (
         <Box maxH='90vh'>
-            <Text fontSize='6xl'>Queue List</Text>
+            <Text fontSize='6xl'>{t('queue_list')}</Text>
             <Flex direction={'column'}>
                 <Center>
                     <InputGroup>
                         <InputLeftAddon>Url</InputLeftAddon>
-                        <Input type='text' placeholder='URL to scrawler' onChange={({target}) => setUrl(target.value)}/>
+                        <Input type='text' placeholder={t('placeholder.url')}
+                               onChange={({target}) => setUrl(target.value)}/>
                     </InputGroup>
                     <Button onClick={() => handleAddToQueue()}>
-                        <Tooltip label='Incluir'>
+                        <Tooltip label={t('btn.include')}>
                             <Plus/>
                         </Tooltip>
                     </Button>
@@ -165,14 +168,14 @@ function ShowQueueList() {
                                 className="border rounded p-1"
                                 onClick={() => table.firstPage()}
                                 disabled={!table.getCanPreviousPage()}
-                                aria-label='Primeiro'
+                                aria-label={t('btn.first')}
                                 icon={<ArrowLeftToLine/>}
                             />
                             <IconButton
                                 className="border rounded p-1"
                                 onClick={() => table.previousPage()}
                                 disabled={!table.getCanPreviousPage()}
-                                aria-label='Voltar'
+                                aria-label={t('btn.back')}
                                 icon={<ArrowLeft/>}
                             />
                             <Text w={170} h={10}>
@@ -184,14 +187,14 @@ function ShowQueueList() {
                                 onClick={() => table.nextPage()}
                                 disabled={!table.getCanNextPage()}
                                 icon={<ArrowRight/>}
-                                aria-label='Avançar'
+                                aria-label={t('btn.next')}
                             />
                             <IconButton
                                 className="border rounded p-1"
                                 onClick={() => table.lastPage()}
                                 disabled={!table.getCanNextPage()}
                                 icon={<ArrowRightToLine/>}
-                                aria-label='Último'
+                                aria-label={t('btn.last')}
                             />
                         </Flex>
                     </Center>

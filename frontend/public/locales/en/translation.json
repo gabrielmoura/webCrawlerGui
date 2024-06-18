@@ -1,0 +1,48 @@
+{
+  "title": "Title",
+  "description": "Description",
+  "enable_proxy": "Enable Proxy",
+  "ignore_local": "Ignore Local",
+  "proxy_url": "Proxy URL",
+  "max_depth": "Max Depth",
+  "max_concurrency": "Max Concurrency",
+  "tld_placeholder": "e.g. com, org, net",
+  "user_agent": "User Agent",
+  "export_label": "Export Data",
+  "config": "Configuration",
+  "depth": "Depth",
+  "actions": "Actions",
+  "theme": "Theme",
+  "queue_list": "Queue List",
+  "btn": {
+    "update": "Update",
+    "search": "Search",
+    "delete": "Delete",
+    "include": "Include",
+    "first": "First",
+    "back": "Back",
+    "forward": "Forward",
+    "last": "Last",
+    "removeAll": "Remove All",
+    "cancel": "Cancel",
+    "start": "Start",
+    "pause": "Pause",
+    "access": "Access",
+    "copyToClipboard": "Copy to Clipboard",
+    "hideToTray": "Hide to Tray",
+    "close": "Close"
+  },
+  "placeholder": {
+    "search": "Search on scrawler",
+    "url": "URL to scrawler"
+  },
+  "nav": {
+    "configs": "Configurations",
+    "search": "Search",
+    "queue": "Queue"
+  },
+  "helper": {
+    "ignore_local": "Ignore local URLs (e.g. http://localhost:3000)",
+    "user_agent": "User agent to use for requests"
+  }
+}

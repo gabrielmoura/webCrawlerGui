@@ -19,12 +19,14 @@ import {Bolt, EyeOff, Menu, Rows4, Search} from "lucide-react";
 import {PlayCrawler} from "./PlayCrawler.tsx";
 import {ToggleTheme} from "./ToggleTheme.tsx";
 import {Hide} from "../../wailsjs/runtime";
+import {useTranslation} from "react-i18next";
 
 interface FRootLayoutProps {
     children?: React.ReactNode;
 }
 
 export function FRootLayout({children}: FRootLayoutProps) {
+    const {t} = useTranslation();
     const [navHide, setNavHide] = useState(false)
     const iconStyle = {
         marginTop: '2px',
@@ -47,21 +49,21 @@ export function FRootLayout({children}: FRootLayoutProps) {
                                     <Center>
                                         <Search style={iconStyle}/>
                                         <Spacer w={2}/>
-                                        Buscar
+                                        {t('nav.search')}
                                     </Center>
                                 </Link>
                                 <Link to='/conf'>
                                     <Center>
                                         <Bolt style={iconStyle}/>
                                         <Spacer w={2}/>
-                                        Configurações
+                                        {t('nav.configs')}
                                     </Center>
                                 </Link>
                                 <Link to='/queue'>
                                     <Center>
                                         <Rows4 style={iconStyle}/>
                                         <Spacer w={2}/>
-                                        Fila
+                                        {t('nav.queue')}
                                     </Center>
                                 </Link>
                             </VStack>
@@ -71,7 +73,7 @@ export function FRootLayout({children}: FRootLayoutProps) {
 
                     <Box flex="1" bg="gray.suave" overflow="auto">
                         <Flex p={4} alignItems="center" pb={1} maxH={'10vh'}>
-                            <Tooltip label='Fechar SideBar'>
+                            <Tooltip label={t('btn.close')}>
                                 <IconButton icon={<Menu/>} aria-label="Menu" onClick={() => setNavHide(old => !old)}/>
                             </Tooltip>
                             <Text fontSize="xl" fontWeight="bold" ml={4}>WebCrawler</Text>
@@ -80,8 +82,8 @@ export function FRootLayout({children}: FRootLayoutProps) {
 
                             <ToggleTheme/>
 
-                            <ButtonGroup aria-label="Logout" mx={1} onClick={() => Hide()}>
-                                <Tooltip label='Ocultar para a bandeja'>
+                            <ButtonGroup aria-label={t('btn.hideToTray')} mx={1} onClick={() => Hide()}>
+                                <Tooltip label={t('btn.hideToTray')}>
                                     <EyeOff/>
                                 </Tooltip>
                             </ButtonGroup>

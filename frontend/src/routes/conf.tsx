@@ -9,6 +9,7 @@ import {InputConfig} from "../theme/InputConfig.tsx";
 import {SwitchConfig} from "../theme/SwitchConfig.tsx";
 import {TagInput} from "../theme/TagInput.tsx";
 import {ExportData} from "../theme/ExportData.tsx";
+import {useTranslation} from 'react-i18next';
 
 
 export const Route = createFileRoute("/conf")({
@@ -16,6 +17,8 @@ export const Route = createFileRoute("/conf")({
 });
 
 function ConfigurationPage() {
+    const {t} = useTranslation();
+
     const [preferences, setPreferences] = useState<types.Preferences | undefined>(
         undefined
     );
@@ -37,7 +40,7 @@ function ConfigurationPage() {
 
     return (
         <Stack direction="column" spacing={10}>
-            <Text fontSize="6xl">Configuração</Text>
+            <Text fontSize="6xl">{t('config')}</Text>
             <Flex direction="column">
                 {preferences && <StackConfig pref={preferences}/>}
             </Flex>
@@ -54,6 +57,8 @@ interface StackConfigProps {
 
 function StackConfig({pref}: StackConfigProps) {
     const toast = useToast()
+    const {t} = useTranslation();
+
 
     const [enabledProxy, setProxy] = useState(pref.general.proxyEnabled);
     const [proxyUrl, setProxyUrl] = useState(pref.general.proxyURL);
@@ -109,7 +114,7 @@ function StackConfig({pref}: StackConfigProps) {
         <Stack spacing={5}>
             <InputGroup>
                 <InputConfig
-                    label="User Agent"
+                    label={t('user_agent')}
                     value={userAgent}
                     onChange={setUserAgent}
                 />
@@ -118,20 +123,20 @@ function StackConfig({pref}: StackConfigProps) {
 
             <Stack direction="row" spacing={4} align="center" h={"5rem"}>
                 <SwitchConfig
-                    label="Enable Proxy"
+                    label={t('enable_proxy')}
                     value={enabledProxy}
                     onChange={setProxy}
                     name="enable-proxy"
                 />
                 <SwitchConfig
-                    label="Ignore Local"
+                    label={t('ignore_local')}
                     value={ignoreLocal}
                     onChange={setIgnoreLocal}
                     name="enable-local"
                 />
                 {enabledProxy && (
                     <InputConfig
-                        label="Proxy URL"
+                        label={t('proxy_url')}
                         value={proxyUrl}
                         onChange={setProxyUrl}
                     />
@@ -143,7 +148,7 @@ function StackConfig({pref}: StackConfigProps) {
             <Stack direction={"row"} spacing={4}>
                 <InputGroup>
                     <InputConfig
-                        label="Max Depth"
+                        label={t('max_depth')}
                         value={maxDepth}
                         type="number"
                         onChange={setMaxDepth}
@@ -152,7 +157,7 @@ function StackConfig({pref}: StackConfigProps) {
 
                 <InputGroup>
                     <InputConfig
-                        label="Max Concurrency"
+                        label={t('max_concurrency')}
                         value={maxConcurrency}
                         type="number"
                         onChange={setMaxConcurrency}
@@ -166,7 +171,7 @@ function StackConfig({pref}: StackConfigProps) {
                     setTags={setTld}
                     tags={tlds}
                     regex={regexTld}
-                    placeholder="Inclua um tld EX: .com"
+                    placeholder={t('tld_placeholder')}
                 />
             </Stack>
 
@@ -179,7 +184,7 @@ function StackConfig({pref}: StackConfigProps) {
                     variant="outline"
                     spinnerPlacement="start"
                 >
-                    Atualizar
+                    {t('btn.update')}
                 </Button>
             </Stack>
         </Stack>

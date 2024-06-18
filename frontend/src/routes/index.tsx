@@ -20,6 +20,7 @@ import {
 } from '@chakra-ui/react'
 import {Search} from 'lucide-react'
 import {LinkExternal} from "../theme/LinkExternal.tsx";
+import {useTranslation} from "react-i18next";
 
 
 export const Route = createFileRoute('/')({
@@ -28,6 +29,7 @@ export const Route = createFileRoute('/')({
 
 
 function SearchPage() {
+    const {t} = useTranslation()
     const [searchString, setSearch] = useState<string>()
     const [data, setData] = useState<any>([])
     const mutSearch = useMutation({
@@ -56,14 +58,14 @@ function SearchPage() {
             <Flex gap='2' direction={'column'}>
                 <Center>
                     <InputGroup>
-                        <InputLeftAddon>Search</InputLeftAddon>
-                        <Input type='text' placeholder='Search on scrawler'
+                        <InputLeftAddon>{t('btn.search')}</InputLeftAddon>
+                        <Input type='text' placeholder={t('placeholder.search')}
                                onChange={(e) => setSearch(e.target.value)}
                                onKeyDown={handleEnter}
                         />
                     </InputGroup>
-                    <Tooltip label='Buscar'>
-                        <IconButton aria-label='Search' icon={mutSearch.isPending ? <Spinner/> : <Search/>}
+                    <Tooltip label={t('btn.search')}>
+                        <IconButton aria-label={t('btn.search')} icon={mutSearch.isPending ? <Spinner/> : <Search/>}
                                     onClick={() => HandleSearch()}/>
                     </Tooltip>
                 </Center>
@@ -73,8 +75,8 @@ function SearchPage() {
                         <Thead>
                             <Tr>
                                 <Td>URL</Td>
-                                <Td>Título</Td>
-                                <Td>Descrição</Td>
+                                <Td>{t('title')}</Td>
+                                <Td>{t('description')}</Td>
                             </Tr>
                         </Thead>
                         {data?.map((item: any) => (
