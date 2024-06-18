@@ -3,7 +3,8 @@ package db
 import (
 	"WebCrawlerGui/backend/infra/data"
 	"WebCrawlerGui/backend/infra/pb"
-	"github.com/golang/protobuf/proto"
+
+	"google.golang.org/protobuf/proto"
 )
 
 // pageMarshal converts a data.Page instance into a protobuf-encoded byte slice.
@@ -13,6 +14,7 @@ func pageMarshal(page *data.Page) ([]byte, error) {
 		Title:       page.Title,
 		Description: page.Description,
 		Words:       page.Words,
+		Links:       page.Links,
 		Meta: &pb.PageMeta{
 			Keywords: page.Meta.Keywords,
 			Manifest: page.Meta.Manifest,
@@ -33,6 +35,7 @@ func pageUnmarshal(bytes []byte, page *data.Page) error {
 	page.Title = pbPage.Title
 	page.Description = pbPage.Description
 	page.Words = pbPage.Words
+	page.Links = pbPage.Links
 	page.Meta = &data.MetaData{
 		Keywords: pbPage.Meta.Keywords,
 		Manifest: pbPage.Meta.Manifest,

@@ -6,14 +6,14 @@ import (
 	"WebCrawlerGui/backend/infra/log"
 	"errors"
 	"fmt"
+	"path"
+	"sort"
+	"sync"
+	"time"
+
 	"github.com/dgraph-io/badger/v4"
 	"github.com/vrischmann/userdir"
 	"go.uber.org/zap"
-	"path"
-	"sort"
-	"strings"
-	"sync"
-	"time"
 )
 
 var (
@@ -188,21 +188,6 @@ func (d Database) ReadPage(url string) (*data.Page, error) {
 	return &page, err
 }
 
-// IsVisited verifica se uma URL foi visitada
-//func (d Database) IsVisited(url string) bool {
-//	var page data.Page
-//	err := d.db.View(func(txn *badger.Txn) error {
-//		item, err := txn.Get([]byte(url))
-//		if err != nil {
-//			return err
-//		}
-//		return item.Value(func(val []byte) error {
-//			return json.Unmarshal(val, &page)
-//		})
-//	})
-//	return err == nil && page.Visited
-//}
-
 // AllVisited recupera todos os URLs visitados
 func (d Database) AllVisited() ([]string, error) {
 	var urls []string
@@ -266,11 +251,6 @@ func (d Database) SearchByTitleOrDescription(searchTerm string) ([]data.PageSear
 	})
 
 	return pages, err
-}
-
-// containsIgnoreCase verifica se um texto contém outro ignorando maiúsculas e minúsculas
-func containsIgnoreCase(text, substr string) bool {
-	return strings.Contains(strings.ToLower(text), strings.ToLower(substr))
 }
 
 // SearchByContent pesquisa páginas por conteúdo e ordena por frequência
@@ -408,8 +388,38 @@ func (d Database) GetAllPage() ([]data.Page, error) {
 	return pages, err
 }
 
-// containsWord checks if a map contains a specific key.
-func containsWord(words map[string]int32, word string) bool {
-	_, ok := words[word]
-	return ok
+func (d Database) SearchV2(searchTerms []string) ([]data.Page, error) {
+	var pages []data.Page
+	prefixKey := []byte(fmt.Sprintf("%s:", config.PageDataIndexName))
+
+	err := d.db.View(func(txn *badger.Txn) error {
+		opts := badger.DefaultIteratorOptions
+		opts.Prefix = prefixKey
+		it := txn.NewIterator(opts)
+		defer it.Close()
+
+		for it.Seek(prefixKey); it.ValidForPrefix(prefixKey); it.Next() {
+			item := it.Item()
+			var page data.Page
+
+			if err := item.Value(func(val []byte) error {
+				return pageUnmarshal(val, &page)
+			}); err != nil {
+				return err
+			}
+
+			if containsIgnoreCaseSlice(page.Title, searchTerms) || containsIgnoreCaseSlice(page.Description, searchTerms) {
+				pages = append(pages, page)
+			}
+			for _, search := range searchTerms {
+				if containsWord(page.Words, search) {
+					pages = append(pages, page)
+				}
+			}
+
+		}
+		return nil
+	})
+
+	return pages, err
 }
