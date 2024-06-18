@@ -5,12 +5,11 @@ go 1.22.2
 require (
 	fyne.io/systray v1.10.0
 	github.com/dgraph-io/badger/v4 v4.2.0
-	github.com/golang/protobuf v1.5.2
 	github.com/vrischmann/userdir v0.0.0-20151206171402-20f291cebd68
 	github.com/wailsapp/wails/v2 v2.8.2
 	go.uber.org/zap v1.27.0
 	golang.org/x/net v0.26.0
-	google.golang.org/protobuf v1.28.1
+	google.golang.org/protobuf v1.34.2
 	gopkg.in/yaml.v3 v3.0.1
 )
 
@@ -24,6 +23,7 @@ require (
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/glog v1.0.0 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
+	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/golang/snappy v0.0.3 // indirect
 	github.com/google/flatbuffers v1.12.1 // indirect
 	github.com/google/uuid v1.3.0 // indirect
