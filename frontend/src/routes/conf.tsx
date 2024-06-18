@@ -62,6 +62,7 @@ function StackConfig({pref}: StackConfigProps) {
     const [maxConcurrency, setMaxConcurrency] = useState(
         pref.general.maxConcurrency
     );
+    const [ignoreLocal, setIgnoreLocal] = useState<boolean>(pref.general.ignoreLocal);
     const [tlds, setTld] = useState<Array<string>>(pref.general.tlds);
     const regexTld = new RegExp("\\.[a-zA-Z][a-zA-Z0-9]{1,4}\\b");
 
@@ -93,6 +94,7 @@ function StackConfig({pref}: StackConfigProps) {
             general: {
                 ...pref.general,
                 proxyEnabled: enabledProxy,
+                ignoreLocal: ignoreLocal,
                 proxyURL: proxyUrl,
                 userAgent: userAgent,
                 maxDepth: maxDepth,
@@ -113,24 +115,30 @@ function StackConfig({pref}: StackConfigProps) {
                 />
             </InputGroup>
 
-            <Stack direction="column">
-                <Text fontSize="2xl">Proxy</Text>
-                <Stack direction="row" spacing={4} align="center" h={"5rem"}>
-                    <SwitchConfig
-                        label="Enable Proxy"
-                        value={enabledProxy}
-                        onChange={setProxy}
-                        name="enable-proxy"
+
+            <Stack direction="row" spacing={4} align="center" h={"5rem"}>
+                <SwitchConfig
+                    label="Enable Proxy"
+                    value={enabledProxy}
+                    onChange={setProxy}
+                    name="enable-proxy"
+                />
+                <SwitchConfig
+                    label="Ignore Local"
+                    value={ignoreLocal}
+                    onChange={setIgnoreLocal}
+                    name="enable-local"
+                />
+                {enabledProxy && (
+                    <InputConfig
+                        label="Proxy URL"
+                        value={proxyUrl}
+                        onChange={setProxyUrl}
                     />
-                    {enabledProxy && (
-                        <InputConfig
-                            label="Proxy URL"
-                            value={proxyUrl}
-                            onChange={setProxyUrl}
-                        />
-                    )}
-                </Stack>
+                )}
+
             </Stack>
+
 
             <Stack direction={"row"} spacing={4}>
                 <InputGroup>
