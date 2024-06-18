@@ -7,7 +7,8 @@ import (
 )
 
 var visitedMutex sync.Mutex
-var pagesMutex sync.Mutex
+
+//var pagesMutex sync.Mutex
 
 // SetVisited adds a URL to the cache to mark it as visited.
 func SetVisited(url string) {

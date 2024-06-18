@@ -152,7 +152,7 @@ func (c CrawlerService) Search(args string) types.JSResp {
 	}
 }
 func (c CrawlerService) SearchWords(args []string) types.JSResp {
-	queue, err := db.DB.SearchWords(args)
+	queue, err := db.DB.SearchV2(args)
 	if err != nil {
 		log.Logger.Error("Error searching queue", zap.Error(err))
 		return types.JSResp{

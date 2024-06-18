@@ -237,6 +237,12 @@ func (a *SystemService) ExportData() types.JSResp {
 			Msg:     "Error getting data",
 		}
 	}
+	if len(data) == 0 {
+		return types.JSResp{
+			Success: false,
+			Msg:     "No data to export",
+		}
+	}
 	jsonData, err := json.MarshalIndent(data, "", "  ")
 	if err != nil {
 		return types.JSResp{

@@ -15,13 +15,16 @@ func pageMarshal(page *data.Page) ([]byte, error) {
 		Description: page.Description,
 		Words:       page.Words,
 		Links:       page.Links,
-		Meta: &pb.PageMeta{
+	}
+	if page.Meta != nil {
+		pbPage.Meta = &pb.PageMeta{
 			Keywords: page.Meta.Keywords,
 			Manifest: page.Meta.Manifest,
 			Ld:       page.Meta.Ld,
 			OG:       page.Meta.OG,
-		},
+		}
 	}
+
 	return proto.Marshal(pbPage)
 }
 
@@ -36,11 +39,14 @@ func pageUnmarshal(bytes []byte, page *data.Page) error {
 	page.Description = pbPage.Description
 	page.Words = pbPage.Words
 	page.Links = pbPage.Links
-	page.Meta = &data.MetaData{
-		Keywords: pbPage.Meta.Keywords,
-		Manifest: pbPage.Meta.Manifest,
-		Ld:       pbPage.Meta.Ld,
-		OG:       pbPage.Meta.OG,
+
+	if pbPage.Meta != nil {
+		page.Meta = &data.MetaData{
+			Keywords: pbPage.Meta.Keywords,
+			Manifest: pbPage.Meta.Manifest,
+			Ld:       pbPage.Meta.Ld,
+			OG:       pbPage.Meta.OG,
+		}
 	}
 	return nil
 }

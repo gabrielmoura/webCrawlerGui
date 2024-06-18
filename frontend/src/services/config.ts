@@ -18,13 +18,13 @@ export class ConfigService {
         })
 
     }
-    static SaveAllPreferences(g: types.Preferences) {
-        SetPreferences(types.Preferences.createFrom(g)).then((resp: types.JSResp) => {
-            console.log('SetPreferences', resp)
-        }).catch((err: any) => {
-            console.error('SetPreferences', err)
-        })
 
+    static async SaveAllPreferences(g: types.Preferences) {
+        const res = await SetPreferences(types.Preferences.createFrom(g));
+        if (res.success) {
+            return Promise.resolve(res.msg)
+        }
+        return Promise.reject(res.msg)
     }
 
     static SavePos(x: number, y: number) {

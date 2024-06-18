@@ -37,7 +37,7 @@ func getDbPath(appName string) string {
 func InitDB(appName string) *Database {
 	opts := badger.DefaultOptions(getDbPath(appName))
 	//opts.Logger = nil // Desativa logs de debug
-	//opts.CompactL0OnClose = true
+	opts.CompactL0OnClose = true
 	opts.NumCompactors = 2
 	opts.ValueLogFileSize = 100 << 20 // 100 MB
 
