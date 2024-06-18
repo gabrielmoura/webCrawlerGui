@@ -13,7 +13,9 @@
   "depth": "Profundidade",
   "actions": "Ações",
   "theme": "Tema",
-  "queue_list": "Lista de filas",
+  "queue_list": "Listagem da fila",
+  "of": "de",
+  "rows": "Linhas",
   "btn": {
     "update": "Atualizar",
     "search": "Buscar",

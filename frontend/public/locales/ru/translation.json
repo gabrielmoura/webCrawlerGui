@@ -1,0 +1,50 @@
+{
+  "title": "Заголовок",
+  "description": "Описание",
+  "enable_proxy": "Включить прокси",
+  "tld_placeholder": "Введите TLD, например, .com",
+  "export_label": "Экспортировать данные",
+  "user_agent": "Пользовательский агент",
+  "max_concurrency": "Максимальное количество одновременных запросов",
+  "max_depth": "Максимальная глубина",
+  "ignore_local": "Игнорировать локальные",
+  "proxy_url": "URL прокси",
+  "config": "Настройки",
+  "depth": "Глубина",
+  "actions": "Действия",
+  "theme": "Тема",
+  "queue_list": "Список очереди",
+  "of": "из",
+  "rows": "Строки",
+  "btn": {
+    "update": "Обновить",
+    "search": "Искать",
+    "delete": "Удалить",
+    "include": "Включить",
+    "first": "Первый",
+    "back": "Назад",
+    "forward": "Вперёд",
+    "last": "Последний",
+    "removeAll": "Удалить всё",
+    "cancel": "Отмена",
+    "start": "Начать",
+    "pause": "Пауза",
+    "access": "Доступ",
+    "copyToClipboard": "Копировать в буфер обмена",
+    "hideToTray": "Скрыть в трей",
+    "close": "Закрыть"
+  },
+  "placeholder": {
+    "search": "Искать в scrawler",
+    "url": "URL для scrawler"
+  },
+  "nav": {
+    "configs": "Настройки",
+    "search": "Искать",
+    "queue": "Очередь"
+  },
+  "helper": {
+    "ignore_local": "Игнорировать локальные URL (например, http://localhost:3000)",
+    "user_agent": "Пользовательский агент, используемый для запросов"
+  }
+}

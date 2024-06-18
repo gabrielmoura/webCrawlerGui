@@ -1,0 +1,50 @@
+{
+  "title": "Título",
+  "description": "Descripción",
+  "enable_proxy": "Habilitar Proxy",
+  "tld_placeholder": "Incluya un TLD, por ejemplo, .com",
+  "export_label": "Exportar datos",
+  "user_agent": "Agente de Usuario",
+  "max_concurrency": "Máximo de Concurrencia",
+  "max_depth": "Máxima Profundidad",
+  "ignore_local": "Ignorar Local",
+  "proxy_url": "URL del Proxy",
+  "config": "Configuración",
+  "depth": "Profundidad",
+  "actions": "Acciones",
+  "theme": "Tema",
+  "queue_list": "Listado de la cola",
+  "of": "de",
+  "rows": "Filas",
+  "btn": {
+    "update": "Actualizar",
+    "search": "Buscar",
+    "delete": "Eliminar",
+    "include": "Incluir",
+    "first": "Primero",
+    "back": "Atrás",
+    "forward": "Adelante",
+    "last": "Último",
+    "removeAll": "Eliminar Todo",
+    "cancel": "Cancelar",
+    "start": "Iniciar",
+    "pause": "Pausar",
+    "access": "Acceder",
+    "copyToClipboard": "Copiar al Portapapeles",
+    "hideToTray": "Ocultar en la Bandeja",
+    "close": "Cerrar"
+  },
+  "placeholder": {
+    "search": "Buscar en scrawler",
+    "url": "URL para scrawler"
+  },
+  "nav": {
+    "configs": "Configuración",
+    "search": "Buscar",
+    "queue": "Cola"
+  },
+  "helper": {
+    "ignore_local": "Ignorar URLs locales (por ejemplo, http://localhost:3000)",
+    "user_agent": "Agente de usuario a utilizar para las solicitudes"
+  }
+}

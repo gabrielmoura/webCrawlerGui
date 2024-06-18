@@ -179,8 +179,8 @@ function ShowQueueList() {
                                 icon={<ArrowLeft/>}
                             />
                             <Text w={170} h={10}>
-                                {table.getState().pagination.pageIndex + 1} of{' '}
-                                {table.getPageCount().toLocaleString()} of {table.getRowCount().toLocaleString()} Rows
+                                {table.getState().pagination.pageIndex + 1} {t('of')}{' '}
+                                {table.getPageCount().toLocaleString()} {t('of')} {table.getRowCount().toLocaleString()} {t('rows')}
                             </Text>
                             <IconButton
                                 className="border rounded p-1"

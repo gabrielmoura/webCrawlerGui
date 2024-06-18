@@ -14,6 +14,8 @@
   "actions": "Actions",
   "theme": "Theme",
   "queue_list": "Queue List",
+  "of": "of",
+  "rows": "Rows",
   "btn": {
     "update": "Update",
     "search": "Search",
