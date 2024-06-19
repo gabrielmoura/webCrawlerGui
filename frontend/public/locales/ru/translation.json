@@ -46,5 +46,25 @@
   "helper": {
     "ignore_local": "Игнорировать локальные URL (например, http://localhost:3000)",
     "user_agent": "Пользовательский агент, используемый для запросов"
+  },
+  "msg": {
+    "Error exporting data": "Ошибка экспорта данных",
+    "No data to export": "Нет данных для экспорта",
+    "Error getting data": "Ошибка получения данных",
+    "Error saving file": "Ошибка сохранения файла",
+    "Data exported": "Данные экспортированы",
+    "There is no data to display": "Нет данных для отображения",
+    "Error searching queue": "Ошибка поиска в очереди",
+    "Error deleting queue": "Ошибка удаления из очереди",
+    "Queue deleted": "Очередь удалена",
+    "Error getting queue": "Ошибка получения очереди",
+    "Error adding URL to queue": "Ошибка добавления URL в очередь",
+    "URL added to queue": "URL добавлен в очередь",
+    "Crawling service stopped": "Служба обхода остановлена",
+    "Error saving configuration": "Ошибка сохранения конфигурации",
+    "Crawling service started": "Служба обхода запущена",
+    "Error saving preferences": "Ошибка сохранения предпочтений",
+    "invalid content": "Неверный контент",
+    "network error": "Сетевая ошибка"
   }
 }

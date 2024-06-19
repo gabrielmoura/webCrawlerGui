@@ -13,7 +13,7 @@ export function ExportData() {
         mutationFn: () => BackupService.Export(),
         onSuccess: (msg) => {
             toast({
-                title: msg,
+                title: t(`msg.${msg}`),
                 status: 'success',
                 isClosable: true,
                 position: 'bottom-right',
@@ -21,7 +21,7 @@ export function ExportData() {
         },
         onError: (msg: string) => {
             toast({
-                title: msg,
+                title: t(`msg.${msg}`),
                 status: 'error',
                 isClosable: true,
                 position: 'bottom-right',

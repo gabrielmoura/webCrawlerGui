@@ -77,7 +77,7 @@ function StackConfig({pref}: StackConfigProps) {
             ConfigService.SaveAllPreferences(preferences),
         onSuccess: (msg) => {
             toast({
-                title: msg,
+                title: t(`msg.${msg}`),
                 status: 'success',
                 isClosable: true,
                 position: 'bottom-right',
@@ -85,7 +85,7 @@ function StackConfig({pref}: StackConfigProps) {
         },
         onError: (msg: string) => {
             toast({
-                title: msg,
+                title: t(`msg.${msg}`),
                 status: 'error',
                 isClosable: true,
                 position: 'bottom-right',

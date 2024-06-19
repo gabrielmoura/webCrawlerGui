@@ -46,5 +46,25 @@
   "helper": {
     "ignore_local": "Ignorar URLs locales (por ejemplo, http://localhost:3000)",
     "user_agent": "Agente de usuario a utilizar para las solicitudes"
+  },
+  "msg": {
+    "Error exporting data": "Error al exportar datos",
+    "No data to export": "No hay datos para exportar",
+    "Error getting data": "Error al obtener datos",
+    "Error saving file": "Error al guardar archivo",
+    "Data exported": "Datos exportados",
+    "There is no data to display": "No hay datos para mostrar",
+    "Error searching queue": "Error al buscar en la cola",
+    "Error deleting queue": "Error al eliminar de la cola",
+    "Queue deleted": "Cola eliminada",
+    "Error getting queue": "Error al obtener la cola",
+    "Error adding URL to queue": "Error al agregar URL a la cola",
+    "URL added to queue": "URL agregada a la cola",
+    "Crawling service stopped": "Servicio de rastreo detenido",
+    "Error saving configuration": "Error al guardar la configuración",
+    "Crawling service started": "Servicio de rastreo iniciado",
+    "Error saving preferences": "Error al guardar preferencias",
+    "invalid content": "Contenido inválido",
+    "network error": "Error de red"
   }
 }

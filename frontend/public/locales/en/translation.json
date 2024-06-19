@@ -46,5 +46,25 @@
   "helper": {
     "ignore_local": "Ignore local URLs (e.g. http://localhost:3000)",
     "user_agent": "User agent to use for requests"
+  },
+  "msg": {
+    "Error exporting data": "Error exporting data",
+    "No data to export": "No data to export",
+    "Error getting data": "Error getting data",
+    "Error saving file": "Error saving file",
+    "Data exported": "Data exported",
+    "There is no data to display": "There is no data to display",
+    "Error searching queue": "Error searching queue",
+    "Error deleting queue": "Error deleting queue",
+    "Queue deleted": "Queue deleted",
+    "Error getting queue": "Error getting queue",
+    "Error adding URL to queue": "Error adding URL to queue",
+    "URL added to queue": "URL added to queue",
+    "Crawling service stopped": "Crawling service stopped",
+    "Error saving configuration": "Error saving configuration",
+    "Crawling service started": "Crawling service started",
+    "Error saving preferences": "Error saving preferences",
+    "invalid content": "invalid content",
+    "network error": "network error"
   }
 }
