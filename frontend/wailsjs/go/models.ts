@@ -1,3 +1,20 @@
+export namespace options {
+	
+	export class SecondInstanceData {
+	
+	
+	    static createFrom(source: any = {}) {
+	        return new SecondInstanceData(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	
+	    }
+	}
+
+}
+
 export namespace types {
 	
 	export class JSResp {
@@ -49,6 +66,7 @@ export namespace types {
 	    proxyURL: string;
 	    userAgent: string;
 	    enableProcessing: boolean;
+	    enableImportHosts: boolean;
 	
 	    static createFrom(source: any = {}) {
 	        return new PreferencesGeneral(source);
@@ -74,6 +92,7 @@ export namespace types {
 	        this.proxyURL = source["proxyURL"];
 	        this.userAgent = source["userAgent"];
 	        this.enableProcessing = source["enableProcessing"];
+	        this.enableImportHosts = source["enableImportHosts"];
 	    }
 	}
 	export class PreferencesBehavior {

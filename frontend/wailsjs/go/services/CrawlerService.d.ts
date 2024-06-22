@@ -3,6 +3,8 @@
 import {types} from '../models';
 import {context} from '../models';
 
+export function AddHotsTxt(arg1:string):Promise<types.JSResp>;
+
 export function AddToQueue(arg1:string):Promise<types.JSResp>;
 
 export function DeleteQueue(arg1:string):Promise<types.JSResp>;

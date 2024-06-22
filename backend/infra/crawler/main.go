@@ -136,7 +136,7 @@ func LoopQueue() {
 }
 
 func visitLink(pageUrl string) ([]byte, *html.Node, error) {
-	resp, err := httpRequest(pageUrl)
+	resp, err := HttpRequest(pageUrl)
 	if err != nil {
 		return nil, nil, fmt.Errorf("error fetching URL %s: %w", pageUrl, err)
 	}

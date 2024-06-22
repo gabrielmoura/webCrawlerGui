@@ -1,9 +1,10 @@
-import {AddToQueue, DeleteQueue, GetAllQueue,Start,Stop} from "../../wailsjs/go/services/CrawlerService";
+import {AddHotsTxt, AddToQueue, DeleteQueue, GetAllQueue, Start, Stop} from "../../wailsjs/go/services/CrawlerService";
 
 export interface Url {
     url: string;
     depth: number;
 }
+
 export type URL = Url
 
 export class QueueService {
@@ -45,6 +46,18 @@ export class QueueService {
             }
             return Promise.reject(res.msg)
         }
+    }
+
+    /**
+     * Get Hosts file entries and add to queue
+     * @param url
+     */
+    static async addHotsTxt(url: string): Promise<string> {
+        const res = await AddHotsTxt(url)
+        if (res.success) {
+            return Promise.resolve(res.data)
+        }
+        return Promise.reject("Not implemented " + url)
     }
 
 }

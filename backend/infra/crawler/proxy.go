@@ -34,7 +34,7 @@ func httpClient() *http.Client {
 	}
 }
 
-func httpRequest(pageUrl string) (resp *http.Response, err error) {
+func HttpRequest(pageUrl string) (resp *http.Response, err error) {
 	client := httpClient()
 	req, _ := http.NewRequest("GET", pageUrl, nil)
 	req.Header.Set("User-Agent", config.Conf.General.UserAgent)

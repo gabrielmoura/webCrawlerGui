@@ -31,12 +31,15 @@ import {
     useReactTable
 } from '@tanstack/react-table';
 import {useTranslation} from "react-i18next";
+import {AddHostsTxt} from "../theme/AddHostsTxt.tsx";
+import useAppStore from "../store/appStore.ts";
 
 export const Route = createFileRoute('/queue')({
     component: ShowQueueList
 })
 
 function ShowQueueList() {
+    const importsEnabled = useAppStore<boolean>(s => s.General!.enableImportHosts)
     const {t} = useTranslation();
     const [url, setUrl] = useState<string>('')
     const client = useQueryClient()
@@ -119,7 +122,7 @@ function ShowQueueList() {
         <Box maxH='90vh'>
             <Text fontSize='6xl'>{t('queue_list')}</Text>
             <Flex direction={'column'}>
-                <Center>
+                <Center my={'0.5rem'}>
                     <InputGroup>
                         <InputLeftAddon>Url</InputLeftAddon>
                         <Input type='text' placeholder={t('placeholder.url')}
@@ -131,6 +134,9 @@ function ShowQueueList() {
                         </Tooltip>
                     </Button>
                 </Center>
+
+                {importsEnabled ? <AddHostsTxt/> : null}
+
                 <TableContainer>
                     <Table variant='striped'>
                         <Thead>

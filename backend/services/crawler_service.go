@@ -6,8 +6,10 @@ import (
 	"WebCrawlerGui/backend/infra/db"
 	"WebCrawlerGui/backend/infra/log"
 	"WebCrawlerGui/backend/types"
+	"bufio"
 	"context"
 	"go.uber.org/zap"
+	"net/http"
 )
 
 type CrawlerService struct {
@@ -73,6 +75,62 @@ func (c CrawlerService) AddToQueue(url string) types.JSResp {
 		Msg:     "URL added to queue",
 	}
 }
+
+// AddHotsTxt adiciona um arquivo Hosts.txt à fila, útil para adicionar uma lista de URLs
+func (c CrawlerService) AddHotsTxt(url string) types.JSResp {
+	if !config.Conf.General.ProxyEnabled {
+		return types.JSResp{
+			Success: false,
+			Msg:     "Proxy is not enabled",
+		}
+	}
+	resp, err := crawler.HttpRequest(url)
+	defer resp.Body.Close()
+	if err != nil {
+		log.Logger.Error("Error getting Hosts.txt", zap.Error(err))
+		return types.JSResp{
+			Success: false,
+			Msg:     "Error getting Hosts.txt",
+		}
+	}
+	if resp.StatusCode != http.StatusOK {
+		log.Logger.Error("Error getting Hosts.txt", zap.Error(err))
+		return types.JSResp{
+			Success: false,
+			Msg:     "Error getting Hosts.txt",
+		}
+	}
+	scanner := bufio.NewScanner(resp.Body)
+
+	var errorsToQueue []error
+	for scanner.Scan() {
+		err = db.DB.AddToQueue(scanner.Text(), 0)
+		if err != nil {
+			errorsToQueue = append(errorsToQueue, err)
+		}
+	}
+
+	if len(errorsToQueue) > 0 {
+		log.Logger.Error("Error adding Hosts.txt to queue", zap.Error(err))
+		return types.JSResp{
+			Success: false,
+			Msg:     "Error adding Hosts.txt to queue",
+		}
+	}
+
+	if err := scanner.Err(); err != nil {
+		log.Logger.Error("Error reading Hosts.txt", zap.Error(err))
+		return types.JSResp{
+			Success: false,
+			Msg:     "Error reading Hosts.txt",
+		}
+	}
+	return types.JSResp{
+		Success: true,
+		Msg:     "Hosts.txt added to queue",
+	}
+}
+
 func (c CrawlerService) GetPaginatedQueue(pag types.Paginated) types.JSResp {
 	queue, err := db.DB.ReadPaginated(pag.Limit, pag.Offset)
 	if err != nil {

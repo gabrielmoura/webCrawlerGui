@@ -6,7 +6,7 @@ require (
 	fyne.io/systray v1.10.0
 	github.com/dgraph-io/badger/v4 v4.2.0
 	github.com/vrischmann/userdir v0.0.0-20151206171402-20f291cebd68
-	github.com/wailsapp/wails/v2 v2.8.2
+	github.com/wailsapp/wails/v2 v2.9.1
 	go.uber.org/zap v1.27.0
 	golang.org/x/net v0.26.0
 	google.golang.org/protobuf v1.34.2
