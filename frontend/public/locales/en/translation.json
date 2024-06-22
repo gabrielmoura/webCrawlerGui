@@ -65,6 +65,13 @@
     "Crawling service started": "Crawling service started",
     "Error saving preferences": "Error saving preferences",
     "invalid content": "invalid content",
-    "network error": "network error"
+    "network error": "network error",
+    "URL removed from queue": "URL removed from queue",
+    "Error removing URL from queue": "Error removing URL from queue",
+    "Proxy is not enabled": "Proxy is not enabled",
+    "Error getting Hosts.txt": "Error getting Hosts.txt",
+    "Error adding Hosts.txt to queue": "Error adding Hosts.txt to queue",
+    "Error reading Hosts.txt": "Error reading Hosts.txt",
+    "Hosts.txt added to queue": "Hosts.txt added to queue"
   }
 }

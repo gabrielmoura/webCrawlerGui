@@ -30,6 +30,10 @@ export function HandleClose() {
   return window['go']['services']['CrawlerService']['HandleClose']();
 }
 
+export function RemoveFromQueueByHost(arg1) {
+  return window['go']['services']['CrawlerService']['RemoveFromQueueByHost'](arg1);
+}
+
 export function Search(arg1) {
   return window['go']['services']['CrawlerService']['Search'](arg1);
 }

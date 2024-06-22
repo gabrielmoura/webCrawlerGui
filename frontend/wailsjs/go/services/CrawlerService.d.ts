@@ -17,6 +17,8 @@ export function Handle(arg1:context.Context):Promise<void>;
 
 export function HandleClose():Promise<void>;
 
+export function RemoveFromQueueByHost(arg1:string):Promise<types.JSResp>;
+
 export function Search(arg1:string):Promise<types.JSResp>;
 
 export function SearchWords(arg1:Array<string>):Promise<types.JSResp>;

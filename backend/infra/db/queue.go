@@ -14,6 +14,7 @@ type Queue interface {
 
 	Read() ([]data.QueueType, error)
 	Delete(url string) error
+	DeletePrefix(prefix string) error
 }
 
 // Enqueue adds a URL to the queue.
@@ -134,5 +135,26 @@ func (d Database) Delete(url string) error {
 	key := []byte(fmt.Sprintf("%s:%s", config.QueueName, url))
 	return d.db.Update(func(txn *badger.Txn) error {
 		return txn.Delete(key)
+	})
+}
+
+// DeletePrefix removes all URLs with a given prefix from the queue.
+func (d Database) DeletePrefix(prefix string) error {
+	blockWrite.RLock()
+	defer blockWrite.RUnlock()
+	key := []byte(fmt.Sprintf("%s:%s", config.QueueName, prefix))
+	return d.db.Update(func(txn *badger.Txn) error {
+		opts := badger.DefaultIteratorOptions
+		opts.PrefetchValues = false
+		it := txn.NewIterator(opts)
+		defer it.Close()
+		for it.Seek(key); it.ValidForPrefix(key); it.Next() {
+			item := it.Item()
+			err := txn.Delete(item.Key())
+			if err != nil {
+				return err
+			}
+		}
+		return nil
 	})
 }

@@ -8,8 +8,10 @@ import (
 	"WebCrawlerGui/backend/types"
 	"bufio"
 	"context"
+	"fmt"
 	"go.uber.org/zap"
 	"net/http"
+	"net/url"
 )
 
 type CrawlerService struct {
@@ -73,6 +75,31 @@ func (c CrawlerService) AddToQueue(url string) types.JSResp {
 	return types.JSResp{
 		Success: true,
 		Msg:     "URL added to queue",
+	}
+}
+
+// RemoveFromQueueByHost remove URLs da fila por host
+func (c CrawlerService) RemoveFromQueueByHost(host string) types.JSResp {
+	link, err := url.Parse(host)
+	if err != nil {
+		log.Logger.Error("Error removing URL from queue", zap.Error(err))
+		return types.JSResp{
+			Success: false,
+			Msg:     "Error removing URL from queue",
+		}
+	}
+	err = db.DB.DeletePrefix(fmt.Sprintf("%s://%s", link.Scheme, link.Host))
+	if err != nil {
+		log.Logger.Error("Error removing URL from queue", zap.Error(err))
+		return types.JSResp{
+			Success: false,
+			Msg:     "Error removing URL from queue",
+		}
+	}
+
+	return types.JSResp{
+		Success: true,
+		Msg:     "URL removed from queue",
 	}
 }
 
