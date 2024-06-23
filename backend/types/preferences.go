@@ -39,5 +39,6 @@ type PreferencesGeneral struct {
 
 	UserAgent string `mapstructure:"USER_AGENT" json:"userAgent" yaml:"user_agent"`
 
-	EnableProcessing bool `mapstructure:"ENABLE_PROCESSING" json:"enableProcessing" yaml:"enableProcessing"`
+	EnableProcessing  bool `mapstructure:"ENABLE_PROCESSING" json:"enableProcessing" yaml:"enableProcessing"`
+	EnableImportHosts bool `mapstructure:"ENABLE_IMPORT_HOSTS" json:"enableImportHosts" yaml:"enableImportHosts"`
 }
