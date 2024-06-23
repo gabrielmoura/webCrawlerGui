@@ -96,11 +96,17 @@ func (s *SystemService) Start(ctx context.Context, version string, appName strin
 	}
 	runtime.EventsOn(s.ctx, "start", func(optionalData ...interface{}) {
 		config.Conf.General.EnableProcessing = true
-		config.Conf.SaveFileConfig()
+		err := config.Conf.SaveFileConfig()
+		if err != nil {
+			log.Logger.Error("Error saving config", zap.Error(err))
+		}
 	})
 	runtime.EventsOn(s.ctx, "pause", func(optionalData ...interface{}) {
 		config.Conf.General.EnableProcessing = false
-		config.Conf.SaveFileConfig()
+		err := config.Conf.SaveFileConfig()
+		if err != nil {
+			log.Logger.Error("Error saving config", zap.Error(err))
+		}
 	})
 
 	go systray.Run(onReadySystray(ctx, appIcon), onExitSystray)
@@ -180,19 +186,19 @@ func (s *SystemService) loopWindowEvent() {
 	}
 }
 
-func (a *SystemService) OnSecondInstanceLaunch(secondInstanceData options.SecondInstanceData) {
+func (s *SystemService) OnSecondInstanceLaunch(secondInstanceData options.SecondInstanceData) {
 	secondInstanceArgs := secondInstanceData.Args
 
 	println("user opened second instance", strings.Join(secondInstanceData.Args, ","))
 	println("user opened second from", secondInstanceData.WorkingDirectory)
-	runtime.WindowUnminimise(a.ctx)
-	runtime.Show(a.ctx)
-	go runtime.EventsEmit(a.ctx, "launchArgs", secondInstanceArgs)
+	runtime.WindowUnminimise(s.ctx)
+	runtime.Show(s.ctx)
+	go runtime.EventsEmit(s.ctx, "launchArgs", secondInstanceArgs)
 }
 
-func (a *SystemService) CheckForUpdate() (resp types.JSResp) {
+func (s *SystemService) CheckForUpdate() (resp types.JSResp) {
 	// request latest version
-	res, err := http.Get(fmt.Sprintf("https://api.github.com/repos/gabrielmoura/%s/releases/latest", a.appName))
+	res, err := http.Get(fmt.Sprintf("https://api.github.com/repos/gabrielmoura/%s/releases/latest", s.appName))
 	if err != nil || res.StatusCode != http.StatusOK {
 		resp.Msg = "network error"
 		return
@@ -208,20 +214,20 @@ func (a *SystemService) CheckForUpdate() (resp types.JSResp) {
 	// compare with current version
 	resp.Success = true
 	resp.Data = map[string]any{
-		"version":  a.appVersion,
+		"version":  s.appVersion,
 		"latest":   respObj.TagName,
 		"page_url": respObj.HtmlUrl,
 	}
 	return
 }
 
-func (a *SystemService) ExportData() types.JSResp {
+func (s *SystemService) ExportData() types.JSResp {
 	saveDialogOptions := runtime.SaveDialogOptions{
 		Title:           "Export data",
 		DefaultFilename: "data.json",
 		Filters:         []runtime.FileFilter{{DisplayName: "JSON Files", Pattern: "*.json"}},
 	}
-	filename, err := runtime.SaveFileDialog(a.ctx, saveDialogOptions)
+	filename, err := runtime.SaveFileDialog(s.ctx, saveDialogOptions)
 	if err != nil {
 		log.Logger.Error("Error saving file", zap.Error(err))
 		return types.JSResp{

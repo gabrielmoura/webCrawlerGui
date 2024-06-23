@@ -80,10 +80,13 @@ func (d Database) ReadPaginated(limit, offset int) ([]data.QueueType, error) {
 				item := it.Item()
 				url := string(item.KeyCopy(nil))
 				depth := 0
-				item.Value(func(val []byte) error {
+				err := item.Value(func(val []byte) error {
 					depth, _ = strconv.Atoi(string(val))
 					return nil
 				})
+				if err != nil {
+					return err
+				}
 				urls = append(urls, data.QueueType{Url: url[len(config.QueueName)+1:], Depth: depth})
 			}
 			count++
@@ -111,10 +114,13 @@ func (d Database) Read() ([]data.QueueType, error) {
 			item := it.Item()
 			url := string(item.KeyCopy(nil))
 			depth := 0
-			item.Value(func(val []byte) error {
+			err := item.Value(func(val []byte) error {
 				depth, _ = strconv.Atoi(string(val))
 				return nil
 			})
+			if err != nil {
+				return err
+			}
 			urls = append(urls, data.QueueType{Url: url[len(config.QueueName)+1:], Depth: depth})
 		}
 		return nil

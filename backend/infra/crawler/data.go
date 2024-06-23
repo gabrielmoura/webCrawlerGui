@@ -3,6 +3,8 @@ package crawler
 import (
 	"WebCrawlerGui/backend/infra/data"
 	"WebCrawlerGui/backend/infra/db"
+	"WebCrawlerGui/backend/infra/log"
+	"go.uber.org/zap"
 	"sync"
 )
 
@@ -13,7 +15,10 @@ var visitedMutex sync.Mutex
 // SetVisited adds a URL to the cache to mark it as visited.
 func SetVisited(url string) {
 	visitedMutex.Lock()
-	db.DB.SetVisited(url)
+	err := db.DB.SetVisited(url)
+	if err != nil {
+		log.Logger.Error("error setting visited", zap.Error(err))
+	}
 	visitedMutex.Unlock()
 }
 
@@ -25,20 +30,15 @@ func GetVisited(url string) bool {
 }
 
 // SetPage adds a page to the database.
-func SetPage(url string, page *data.Page) {
-	//pagesMutex.Lock()
+func SetPage(page *data.Page) {
 	err := db.DB.WritePage(page)
 	if err != nil {
 		return
 	}
-	//pages[url] = page
-	//pagesMutex.Unlock()
 }
 
 // GetPage retrieves a page from the database.
 func GetPage(url string) *data.Page {
-	//pagesMutex.Lock()
-	//defer pagesMutex.Unlock()
 	p, err := db.DB.ReadPage(url)
 	if err != nil {
 		return nil

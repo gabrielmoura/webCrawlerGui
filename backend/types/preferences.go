@@ -1,42 +1,8 @@
 package types
 
-import "WebCrawlerGui/backend/consts"
-
 type Preferences struct {
 	Behavior PreferencesBehavior `json:"behavior" yaml:"behavior"`
 	General  PreferencesGeneral  `json:"general" yaml:"general"`
-}
-
-func NewPreferences() Preferences {
-	return Preferences{
-		Behavior: PreferencesBehavior{
-			AsideWidth:   consts.DEFAULT_ASIDE_WIDTH,
-			WindowWidth:  consts.DEFAULT_WINDOW_WIDTH,
-			WindowHeight: consts.DEFAULT_WINDOW_HEIGHT,
-		},
-		General: PreferencesGeneral{
-			AppName:  "WebCrawler",
-			Theme:    "auto",
-			Language: "auto",
-			FontSize: consts.DEFAULT_FONT_SIZE,
-			ScanSize: consts.DEFAULT_SCAN_SIZE,
-			//KeyIconStyle: 0,
-			CheckUpdate: true,
-			//AllowTrack:   true,
-
-			TimeFormat:       "02-Jan-2006",
-			TimeZone:         "America/Sao_Paulo",
-			MaxConcurrency:   10,
-			MaxDepth:         2,
-			EnableProcessing: false,
-
-			UserAgent:    "Go-http-client/1.1",
-			ProxyEnabled: false,
-			ProxyURL:     "",
-			Tlds:         []string{},
-			IgnoreLocal:  false,
-		},
-	}
 }
 
 type PreferencesBehavior struct {

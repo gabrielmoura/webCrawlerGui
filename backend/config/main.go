@@ -36,8 +36,6 @@ func InitConfig(appName string, appVersion string) *Config {
 	return cs
 }
 
-// MÉTODOS INTERNOS
-
 func (c *Config) getPath(fileName string) string {
 	return path.Join(userdir.GetConfigHome(), c.AppName, fileName)
 }
@@ -102,8 +100,11 @@ func (c *Config) DefaultConfig() {
 func (c *Config) LoadConfig() error {
 	//c.RLock()
 	//defer c.RUnlock()
-
 	if _, err := os.Stat(c.getPath("config.yml")); os.IsNotExist(err) {
+		err := ensureDirExists(c.getPath(""))
+		if err != nil {
+			log.Logger.Info("creating config directory", zap.Error(err))
+		}
 		c.DefaultConfig()
 		return c.SaveFileConfig()
 	}
