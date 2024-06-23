@@ -182,7 +182,7 @@ func (d Database) ReadPage(url string) (*data.Page, error) {
 			return pageUnmarshal(val, &page)
 		})
 	})
-	if err == badger.ErrKeyNotFound {
+	if errors.Is(badger.ErrKeyNotFound, err) {
 		return nil, nil
 	}
 	return &page, err
