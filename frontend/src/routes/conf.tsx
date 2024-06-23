@@ -1,15 +1,16 @@
 import {createFileRoute} from "@tanstack/react-router";
-import {Button, Flex, InputGroup, Stack, Text, useToast,} from "@chakra-ui/react";
+import {Button, Center, Flex, InputGroup, Stack, Text, useToast,} from "@chakra-ui/react";
 import {useEffect, useState} from "react";
 import useAppStore from "../store/appStore";
 import {types} from "../../wailsjs/go/models.ts";
 import {ConfigService} from "../services/config.ts";
 import {useMutation} from "@tanstack/react-query";
-import {InputConfig} from "../theme/InputConfig.tsx";
-import {SwitchConfig} from "../theme/SwitchConfig.tsx";
-import {TagInput} from "../theme/TagInput.tsx";
-import {ExportData} from "../theme/ExportData.tsx";
 import {useTranslation} from 'react-i18next';
+import {ExportData} from "../components/ExportData.tsx";
+import {InputConfig} from "../components/InputConfig.tsx";
+import {SwitchConfig} from "../components/SwitchConfig.tsx";
+import {TagInput} from "../components/TagInput.tsx";
+import {ImportData} from "../components/ImportData.tsx";
 
 
 export const Route = createFileRoute("/conf")({
@@ -45,7 +46,11 @@ function ConfigurationPage() {
                 {preferences && <StackConfig pref={preferences}/>}
             </Flex>
             <Flex direction="column">
-                <ExportData/>
+               <Center>
+                   <ExportData/>
+                   <ImportData/>
+               </Center>
+
             </Flex>
         </Stack>
     );

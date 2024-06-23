@@ -16,7 +16,8 @@ import {
     Th,
     Thead,
     Tooltip,
-    Tr
+    Tr,
+    useToast
 } from "@chakra-ui/react";
 import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
 import {useState} from 'react';
@@ -31,8 +32,8 @@ import {
     useReactTable
 } from '@tanstack/react-table';
 import {useTranslation} from "react-i18next";
-import {AddHostsTxt} from "../theme/AddHostsTxt.tsx";
 import useAppStore from "../store/appStore.ts";
+import {AddHostsTxt} from "../components/AddHostsTxt.tsx";
 
 export const Route = createFileRoute('/queue')({
     component: ShowQueueList
@@ -41,8 +42,10 @@ export const Route = createFileRoute('/queue')({
 function ShowQueueList() {
     const importsEnabled = useAppStore<boolean>(s => s.General!.enableImportHosts)
     const {t} = useTranslation();
+    const toast = useToast()
     const [url, setUrl] = useState<string>('')
     const client = useQueryClient()
+
     const {data} = useQuery({
         queryFn: async () => QueueService.getAllQueue(),
         queryKey: ['queue', 'get'],
@@ -52,17 +55,41 @@ function ShowQueueList() {
     const mutateCreate = useMutation({
         mutationKey: ['queue', 'set'],
         mutationFn: async (url: string) => QueueService.addToQueue(url),
-        onSuccess: async () => {
+        onSuccess: async (msg) => {
+            setUrl('')
+            toast({
+                title: t(`msg.${msg}`),
+                status: 'success',
+                duration: 9000,
+                isClosable: true,
+            })
             await client.invalidateQueries({queryKey: ['queue', 'get']})
-        }
+        },
+        onError: (msg) => toast({
+            title: t(`msg.${msg}`),
+            status: 'error',
+            duration: 9000,
+            isClosable: true,
+        })
     })
 
     const mutateDelete = useMutation({
         mutationKey: ['queue', 'delete'],
         mutationFn: async (url: string) => QueueService.deleteQueue(url),
-        onSuccess: async () => {
+        onSuccess: async (msg) => {
             await client.invalidateQueries({queryKey: ['queue', 'get']})
-        }
+            toast({
+                title: t(`msg.${msg}`),
+                status: 'success',
+                duration: 9000,
+                isClosable: true,
+            })
+        }, onError: (msg) => toast({
+            title: t(`msg.${msg}`),
+            status: 'error',
+            duration: 9000,
+            isClosable: true,
+        })
     })
 
     function handleAddToQueue() {

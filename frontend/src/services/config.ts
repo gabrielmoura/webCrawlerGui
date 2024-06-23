@@ -5,7 +5,7 @@ import {
     SaveWindowSize,
     SetPreferences
 } from "../../wailsjs/go/services/ConfigService";
-import {EventsEmit} from "../../wailsjs/runtime";
+import {EventsEmit, Hide} from "../../wailsjs/runtime";
 
 export class ConfigService {
     static SavePreferences(b: types.PreferencesBehavior) {
@@ -54,5 +54,9 @@ export class ConfigService {
             return Promise.resolve(res.data)
         }
         return Promise.reject(res.msg)
+    }
+
+    static HideWindow() {
+        Hide()
     }
 }

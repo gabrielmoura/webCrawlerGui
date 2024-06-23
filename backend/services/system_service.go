@@ -3,6 +3,7 @@ package services
 import (
 	"WebCrawlerGui/backend/config"
 	"WebCrawlerGui/backend/consts"
+	data2 "WebCrawlerGui/backend/infra/data"
 	"WebCrawlerGui/backend/infra/db"
 	"WebCrawlerGui/backend/infra/log"
 	"WebCrawlerGui/backend/types"
@@ -267,5 +268,49 @@ func (s *SystemService) ExportData() types.JSResp {
 	return types.JSResp{
 		Success: true,
 		Msg:     "Data exported",
+	}
+}
+func (s *SystemService) ImportData() types.JSResp {
+	openDialogOptions := runtime.OpenDialogOptions{
+		Title: "Import data",
+		Filters: []runtime.FileFilter{
+			{DisplayName: "JSON Files", Pattern: "*.json"},
+		},
+	}
+	filename, err := runtime.OpenFileDialog(s.ctx, openDialogOptions)
+	if err != nil {
+		log.Logger.Error("Error opening file", zap.Error(err))
+		return types.JSResp{
+			Success: false,
+			Msg:     "Error opening file",
+		}
+	}
+
+	data, err := os.ReadFile(filename)
+	if err != nil {
+		return types.JSResp{
+			Success: false,
+			Msg:     "Error reading file",
+		}
+	}
+	var pages []data2.Page
+	err = json.Unmarshal(data, &pages)
+	if err != nil {
+		return types.JSResp{
+			Success: false,
+			Msg:     "Error parsing data",
+		}
+	}
+
+	err = db.DB.ImportData(pages)
+	if err != nil {
+		return types.JSResp{
+			Success: false,
+			Msg:     "Error importing data",
+		}
+	}
+	return types.JSResp{
+		Success: true,
+		Msg:     "Data imported",
 	}
 }

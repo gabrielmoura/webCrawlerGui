@@ -10,6 +10,10 @@ export function ExportData() {
   return window['go']['services']['SystemService']['ExportData']();
 }
 
+export function ImportData() {
+  return window['go']['services']['SystemService']['ImportData']();
+}
+
 export function Info() {
   return window['go']['services']['SystemService']['Info']();
 }

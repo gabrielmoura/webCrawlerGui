@@ -423,3 +423,22 @@ func (d Database) SearchV2(searchTerms []string) ([]data.Page, error) {
 
 	return pages, err
 }
+
+func (d Database) ImportData(pages []data.Page) error {
+	var errs []error
+	for _, page := range pages {
+		err := d.WritePage(&page)
+		if err != nil {
+			errs = append(errs, err)
+		}
+		err = d.SetVisited(page.Url)
+		if err != nil {
+			errs = append(errs, err)
+		}
+	}
+	if len(errs) > 0 {
+		log.Logger.Error("error writing page", zap.Errors("errors", errs))
+		return fmt.Errorf("error writing page: %v", errs)
+	}
+	return nil
+}

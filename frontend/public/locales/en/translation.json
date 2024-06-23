@@ -9,6 +9,7 @@
   "tld_placeholder": "e.g. com, org, net",
   "user_agent": "User Agent",
   "export_label": "Export Data",
+  "import_label": "Import Data",
   "config": "Configuration",
   "depth": "Depth",
   "actions": "Actions",
@@ -16,6 +17,7 @@
   "queue_list": "Queue List",
   "of": "of",
   "rows": "Rows",
+  "results_found": "Results Found",
   "btn": {
     "update": "Update",
     "search": "Search",
@@ -48,6 +50,7 @@
     "user_agent": "User agent to use for requests"
   },
   "msg": {
+    "welcome": "Welcome to Scrawler",
     "Error exporting data": "Error exporting data",
     "No data to export": "No data to export",
     "Error getting data": "Error getting data",
@@ -72,6 +75,11 @@
     "Error getting Hosts.txt": "Error getting Hosts.txt",
     "Error adding Hosts.txt to queue": "Error adding Hosts.txt to queue",
     "Error reading Hosts.txt": "Error reading Hosts.txt",
-    "Hosts.txt added to queue": "Hosts.txt added to queue"
+    "Hosts.txt added to queue": "Hosts.txt added to queue",
+    "Error opening file": "Error opening file",
+    "Error reading file": "Error reading file",
+    "Error parsing data": "Error parsing data",
+    "Error importing data": "Error importing data",
+    "Data imported": "Data imported"
   }
 }

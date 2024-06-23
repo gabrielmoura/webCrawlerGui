@@ -2,11 +2,11 @@ import {createRootRouteWithContext, Outlet,} from '@tanstack/react-router'
 import {TanStackRouterDevtools} from '@tanstack/router-devtools'
 import {QueryClient} from '@tanstack/react-query'
 import {ReactQueryDevtools} from '@tanstack/react-query-devtools'
-import {FRootLayout} from '../theme/layout'
 import {useEffect} from "react";
 import {types} from "../../wailsjs/go/models.ts";
 import useAppStore from "../store/appStore.ts";
 import {ConfigService} from "../services/config.ts";
+import {FRootLayout} from "../components/Layout.tsx";
 
 export const Route = createRootRouteWithContext<{
     queryClient: QueryClient
@@ -18,10 +18,6 @@ function RootComponent() {
     const upB = useAppStore(s => s.updateBehavior)
     const upG = useAppStore(s => s.updateGeneral)
     useEffect(() => {
-        // EventsOn('window_changed', (event: any) => {
-        //     console.log('window_changed', event)
-        // })
-
         ConfigService.Get().then((resp: types.Preferences) => {
                 console.log('GetPreferences', resp)
                 upB(resp.behavior)
@@ -30,8 +26,6 @@ function RootComponent() {
         ).catch((err: any) => {
             console.error('GetPreferences', err)
         })
-        // Environment().then(env => console.log('Environment', env))
-        // Info().then(info => console.log('Info', info))
     }, [])
     return (
         <>

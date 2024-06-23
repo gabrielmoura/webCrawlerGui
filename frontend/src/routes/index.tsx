@@ -14,13 +14,14 @@ import {
     Table,
     Tbody,
     Td,
+    Text,
     Thead,
     Tooltip,
     Tr
 } from '@chakra-ui/react'
 import {Search} from 'lucide-react'
-import {LinkExternal} from "../theme/LinkExternal.tsx";
 import {useTranslation} from "react-i18next";
+import {LinkExternal} from "../components/LinkExternal.tsx";
 
 
 export const Route = createFileRoute('/')({
@@ -69,6 +70,7 @@ function SearchPage() {
                                     onClick={() => HandleSearch()}/>
                     </Tooltip>
                 </Center>
+                {data?.length > 0 ? <Text>{data?.length} {t('results_found')}</Text> : null}
                 {mutSearch.isError && <div>Error</div>}
                 {mutSearch.isSuccess && (
                     <Table>

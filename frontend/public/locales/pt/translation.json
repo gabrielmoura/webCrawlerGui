@@ -4,6 +4,7 @@
   "enable_proxy": "Habilitar Proxy",
   "tld_placeholder": "Inclua um tld EX: .com",
   "export_label": "Exportar dados",
+  "import_label": "Importar dados",
   "user_agent": "Agente de Usuário",
   "max_concurrency": "Máximo de Concorrência",
   "max_depth": "Máximo de Profundidade",
@@ -16,6 +17,7 @@
   "queue_list": "Listagem da fila",
   "of": "de",
   "rows": "Linhas",
+  "results_found": "Resultados encontrados",
   "btn": {
     "update": "Atualizar",
     "search": "Buscar",
@@ -48,6 +50,7 @@
     "user_agent": "Agente de usuário a ser usado para solicitações"
   },
   "msg": {
+    "welcome": "Bem vindo ao Buscador",
     "Error exporting data": "Erro ao exportar dados",
     "No data to export": "Nenhum dado para exportar",
     "Error getting data": "Erro ao obter dados",
@@ -65,6 +68,18 @@
     "Crawling service started": "Serviço de rastreamento iniciado",
     "Error saving preferences": "Erro ao salvar preferências",
     "invalid content": "Conteúdo inválido",
-    "network error": "Erro de rede"
+    "network error": "Erro de rede",
+    "URL removed from queue": "URL removida da fila",
+    "Error removing URL from queue": "Erro ao remover URL da fila",
+    "Proxy is not enabled": "Proxy não está habilitado",
+    "Error getting Hosts.txt": "Erro ao obter Hosts.txt",
+    "Error adding Hosts.txt to queue": "Erro ao adicionar Hosts.txt à fila",
+    "Error reading Hosts.txt": "Erro ao ler Hosts.txt",
+    "Hosts.txt added to queue": "Hosts.txt adicionado à fila",
+    "Error opening file": "Erro ao abrir arquivo",
+    "Error reading file": "Erro ao ler arquivo",
+    "Error parsing data": "Erro ao analisar dados",
+    "Error importing data": "Erro ao importar dados",
+    "Data imported": "Dados importados"
   }
 }
