@@ -34,19 +34,19 @@ type latestRelease struct {
 	HtmlUrl string `json:"html_url"`
 }
 
-var system *SystemService
+var System *SystemService
 var onceSystem sync.Once
 
-func System() *SystemService {
-	if system == nil {
+func InitSystem() *SystemService {
+	if System == nil {
 		onceSystem.Do(func() {
-			system = &SystemService{
+			System = &SystemService{
 				appVersion: "0.0.0",
 			}
-			go system.loopWindowEvent()
+			go System.loopWindowEvent()
 		})
 	}
-	return system
+	return System
 }
 func onReadySystray(ctx context.Context, appIcon []byte) func() {
 	return func() {
@@ -309,6 +309,7 @@ func (s *SystemService) ImportData() types.JSResp {
 			Msg:     "Error importing data",
 		}
 	}
+	db.DB.OptimizeCacheNow()
 	return types.JSResp{
 		Success: true,
 		Msg:     "Data imported",

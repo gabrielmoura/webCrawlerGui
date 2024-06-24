@@ -3,10 +3,12 @@ import {
     AddToQueue,
     DeleteQueue,
     GetAllQueue,
+    GetTreePages,
     RemoveFromQueueByHost,
     Start,
     Stop
 } from "../../wailsjs/go/services/CrawlerService";
+import {TreeNode} from "../components/TreeLink.tsx";
 
 export interface Url {
     url: string;
@@ -14,6 +16,11 @@ export interface Url {
 }
 
 export type URL = Url
+
+export interface Pagination {
+    pageNumber: number;
+    pageSize: number;
+}
 
 export class QueueService {
     /**
@@ -87,12 +94,20 @@ export class QueueService {
     /**
      * Remove all from queue by host
      * Attention: This method can remove all data
-     * @param url
+     * @param prefix
      */
-    static async removeFromQueue(url: string): Promise<string> {
-        const res = await RemoveFromQueueByHost(url)
+    static async removeFromQueue(prefix: string): Promise<string> {
+        const res = await RemoveFromQueueByHost(prefix)
         if (res.success) {
             return Promise.resolve(res.msg)
+        }
+        return Promise.reject(res.msg)
+    }
+
+    static async getTreePages({pageNumber, pageSize = 10}: Pagination): Promise<Array<TreeNode>> {
+        const res = await GetTreePages(pageNumber, pageSize)
+        if (res.success) {
+            return Promise.resolve(res.data)
         }
         return Promise.reject(res.msg)
     }

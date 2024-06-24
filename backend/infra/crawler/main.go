@@ -117,7 +117,7 @@ func LoopQueue() {
 				break
 			}
 			if len(links) == 0 {
-				log.Logger.Info("Queue is empty", zap.Any("Links", links))
+				log.Logger.Debug("Queue is empty", zap.Any("Links", links))
 				continue
 			}
 
@@ -185,21 +185,26 @@ func countWordsInText(data []byte) (map[string]int32, error) {
 	log.Logger.Debug("Word Count")
 	// Etapa 1: Ignorar determinadas tags HTML
 	htmlRegex := regexp.MustCompile("(?s)<(script|style|noscript|link|meta)[^>]*?>.*?</(script|style|noscript|link|meta)>")
-	parcialPlainText := htmlRegex.ReplaceAll(data, []byte(""))
+	stage1 := htmlRegex.ReplaceAll(data, []byte(""))
 
-	// Etapa 2: remover tags HTML
+	// Etapa 2: remover tags HTML caso ainda existam
 	tagsRegex := regexp.MustCompile("<([^>]*)>")
-	plainText := tagsRegex.ReplaceAll(parcialPlainText, []byte(""))
+	stage2 := tagsRegex.ReplaceAll(stage1, []byte(""))
 
-	// Etapa 3: Normalizar texto
-	normalizedText := bytes.ToLower(plainText)
+	// Etapa 3: garante que palavras não tenham sequências de dois números consecutivos e não consistam apenas em números,
+	// exigindo pelo menos uma letra
+	numRegex := regexp.MustCompile("^(?!.*\\d{2,})[a-zA-Z0-9]*[a-zA-Z][a-zA-Z0-9]*$")
+	stage3 := numRegex.ReplaceAll(stage2, []byte(" "))
 
-	// Etapa 4: Remova caracteres especiais e divida em palavras
+	// Etapa 4: Normalizar texto
+	normalizedText := bytes.ToLower(stage3)
+
+	// Etapa 5: Remova caracteres especiais e divida em palavras
 	wordRegex := regexp.MustCompile("[^\\pL\\pN\\pZ'-]+")
 	noSpecialCh := wordRegex.ReplaceAll(normalizedText, []byte(" "))
 	words := bytes.Split(noSpecialCh, []byte(" "))
 
-	// Etapa 5: Conte a frequência das palavras (ignorando palavras comuns)
+	// Etapa 6: Conte a frequência das palavras (ignorando palavras comuns)
 	wordCounts := make(map[string]int32)
 	for _, wordBytes := range words {
 		word := string(bytes.TrimSpace(wordBytes))

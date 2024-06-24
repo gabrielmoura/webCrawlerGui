@@ -20,3 +20,7 @@ message PageMeta{
   string Ld = 4;
 }
 
+message PageIndex {
+  repeated string Keys = 1;
+}
+

@@ -3,7 +3,6 @@ package db
 import (
 	"WebCrawlerGui/backend/infra/data"
 	"WebCrawlerGui/backend/infra/pb"
-
 	"google.golang.org/protobuf/proto"
 )
 
@@ -48,5 +47,22 @@ func pageUnmarshal(bytes []byte, page *data.Page) error {
 			OG:       pbPage.Meta.OG,
 		}
 	}
+	return nil
+}
+
+func indexPageMarshal(index *data.PageIndex) ([]byte, error) {
+	pbPageIndex := &pb.PageIndex{
+		Keys: index.Keys,
+	}
+	//return json.Marshal(index)
+	return proto.Marshal(pbPageIndex)
+}
+func indexPageUnmarshal(bytes []byte, index *data.PageIndex) error {
+	//return json.Unmarshal(bytes, index)
+	var pbPageIndex pb.PageIndex
+	if err := proto.Unmarshal(bytes, &pbPageIndex); err != nil {
+		return err
+	}
+	index.Keys = pbPageIndex.Keys
 	return nil
 }

@@ -2,7 +2,9 @@ package services
 
 import (
 	"WebCrawlerGui/backend/config"
+	"WebCrawlerGui/backend/helper"
 	"WebCrawlerGui/backend/infra/crawler"
+	"WebCrawlerGui/backend/infra/data"
 	"WebCrawlerGui/backend/infra/db"
 	"WebCrawlerGui/backend/infra/log"
 	"WebCrawlerGui/backend/types"
@@ -16,6 +18,11 @@ import (
 
 type CrawlerService struct {
 	Ctx context.Context
+}
+
+func Crawling(appName string) *CrawlerService {
+	db.InitDB(appName)
+	return &CrawlerService{}
 }
 
 func (c CrawlerService) Handle(ctx context.Context) {
@@ -215,27 +222,6 @@ func (c CrawlerService) DeleteQueue(url string) types.JSResp {
 	}
 }
 
-// Search pesquisa páginas por título, descrição ou conteúdo
-func (c CrawlerService) Search(args string) types.JSResp {
-	queue, err := db.DB.Search(args)
-	if err != nil {
-		log.Logger.Error("Error searching queue", zap.Error(err))
-		return types.JSResp{
-			Success: false,
-			Msg:     "Error searching queue",
-		}
-	}
-	if len(queue) == 0 {
-		return types.JSResp{
-			Success: true,
-			Msg:     "There is no data to display",
-		}
-	}
-	return types.JSResp{
-		Success: true,
-		Data:    queue,
-	}
-}
 func (c CrawlerService) SearchWords(args []string) types.JSResp {
 	queue, err := db.DB.SearchV2(args)
 	if err != nil {
@@ -257,7 +243,48 @@ func (c CrawlerService) SearchWords(args []string) types.JSResp {
 	}
 }
 
-func Crawling(appName string) *CrawlerService {
-	db.InitDB(appName)
-	return &CrawlerService{}
+// GetTreePages retorna uma árvore de páginas agrupadas por host
+func (c CrawlerService) GetTreePages(pageN, size int) types.JSResp {
+	pages, _ := db.DB.GetPaginatedPage(pageN, size)
+	pageMap := make(map[string]*data.Page)
+	hostMap := make(map[string]*types.TreeNode)
+	visited := make(map[string]bool)
+
+	// Construir um mapa para acesso rápido às páginas por URL e agrupar por host
+	for i := range pages {
+		page := &pages[i]
+		pageMap[page.Url] = page
+
+		u, err := url.Parse(page.Url)
+		if err != nil {
+			continue // Ignorar URLs inválidas
+		}
+
+		host := helper.NormalizeURL(u.Scheme + "://" + u.Host)
+
+		if _, exists := hostMap[host]; !exists {
+			// Incluir título e descrição do nó pai
+			hostMap[host] = &types.TreeNode{
+				Title:       page.Title,
+				Description: page.Description,
+				URL:         host,
+				Children:    []types.TreeNode{},
+			}
+		}
+
+		// Evitar adicionar a URL do nó pai aos filhos
+		if helper.NormalizeURL(page.Url) != host {
+			hostMap[host].Children = append(hostMap[host].Children, helper.PageToTreeNode(page, pageMap, host, visited))
+		}
+	}
+
+	var treeNodes []types.TreeNode
+	for _, node := range hostMap {
+		treeNodes = append(treeNodes, *node)
+	}
+
+	return types.JSResp{
+		Success: true,
+		Data:    treeNodes,
+	}
 }

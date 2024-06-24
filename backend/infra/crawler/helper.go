@@ -146,22 +146,31 @@ func prepareParentLink(parentLink, link string) (*url.URL, error) {
 	return nURL, nil
 }
 func isStatusErr(status int, url *url.URL) bool {
-	if status == http.StatusOK {
-		return false
+	if isSuccess(status) && isI2P(url) && url.Query().Has("i2paddresshelper") {
+		handleListHelperI2P(url.String())
+		return true
 	}
 
-	i2p := strings.HasSuffix(url.Host, ".i2p")
 	switch status {
 	case http.StatusConflict:
-		if i2p {
+		if isI2P(url) {
 			handleListHelperI2P(url.String())
 		}
 		return true
 	default:
-		return status < 200 || status >= 300
+		return !isSuccess(status)
 	}
+}
+
+func isSuccess(status int) bool {
+	return status >= 200 && status < 300
+}
+
+func isI2P(url *url.URL) bool {
+	return strings.HasSuffix(url.Host, ".i2p")
 }
 
 func handleListHelperI2P(url string) {
 	// TODO: Lógica para adicionar a lista de helpers encontrados
+	log.Logger.Info("Helper I2P encontrado", zap.String("URL", url))
 }

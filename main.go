@@ -29,7 +29,7 @@ var assets embed.FS
 //go:embed build/appicon.png
 var icon []byte
 
-var version = "0.0.1"
+var version = "0.0.2"
 var AppName = "WebCrawlerGui"
 
 func main() {
@@ -40,7 +40,7 @@ func main() {
 
 	// Create an instance of the app structure
 	prefSvc := services.InitConfigService(AppName, version)
-	srv := services.System()
+	srv := services.InitSystem()
 	crw := services.Crawling(AppName)
 
 	// menu

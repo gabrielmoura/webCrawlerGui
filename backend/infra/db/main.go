@@ -85,15 +85,19 @@ func (d Database) SyncCache() error {
 func (d Database) OptimizeCache(nMinute int) {
 	for {
 		time.Sleep(time.Duration(nMinute) * time.Minute)
-		log.Logger.Info("Optimizing cache")
-		blockWrite.Lock()
-		err := d.db.RunValueLogGC(0.9)
-		if err != nil && !errors.Is(badger.ErrNoRewrite, err) {
-			log.Logger.Info("error optimizing cache", zap.Error(err))
-		}
-		blockWrite.Unlock()
+		d.OptimizeCacheNow()
 	}
 }
+func (d Database) OptimizeCacheNow() {
+	log.Logger.Info("Optimizing cache")
+	blockWrite.Lock()
+	err := d.db.RunValueLogGC(0.9)
+	if err != nil && !errors.Is(badger.ErrNoRewrite, err) {
+		log.Logger.Info("error optimizing cache", zap.Error(err))
+	}
+	blockWrite.Unlock()
+}
+
 func (d Database) IsVisited(url string) bool {
 	key := []byte(fmt.Sprintf("%s:%s", config.VisitedIndexName, url))
 	err := d.db.View(func(txn *badger.Txn) error {
@@ -157,21 +161,63 @@ func (d Database) GetFromQueueV2(getNumber int) ([]data.QueueType, error) {
 func (d Database) WritePage(page *data.Page) error {
 	blockWrite.RLock()
 	defer blockWrite.RUnlock()
-	Key := []byte(fmt.Sprintf("%s:%s", config.PageDataIndexName, page.Url))
+
+	pageKey := []byte(fmt.Sprintf("%s:%s", config.PageDataPrefix, page.Url))
+	indexKey := []byte(config.PageDataIndexName)
 
 	return d.db.Update(func(txn *badger.Txn) error {
-		bytes, err := pageMarshal(page)
+		// Marshal the page data
+		pageBytes, err := pageMarshal(page)
 		if err != nil {
-			return err
+			return fmt.Errorf("error marshaling page: %w", err)
 		}
-		return txn.Set(Key, bytes)
+
+		// Set the page data in the database
+		if err := txn.Set(pageKey, pageBytes); err != nil {
+			return fmt.Errorf("error setting page data: %w", err)
+		}
+
+		// Get the index from the database
+		item, err := txn.Get(indexKey)
+		var pageIndex data.PageIndex
+
+		if err != nil {
+			if errors.Is(badger.ErrKeyNotFound, err) {
+				// If the index does not exist, initialize it
+				pageIndex = data.PageIndex{}
+			} else {
+				return fmt.Errorf("error getting index: %w", err)
+			}
+		} else {
+			if err := item.Value(func(val []byte) error {
+				return indexPageUnmarshal(val, &pageIndex)
+			}); err != nil {
+				return fmt.Errorf("error unmarshaling index: %w", err)
+			}
+		}
+
+		// Update the index with the new page URL
+		pageIndex.Keys = append(pageIndex.Keys, page.Url)
+
+		// Marshal the updated index
+		indexBytes, err := indexPageMarshal(&pageIndex)
+		if err != nil {
+			return fmt.Errorf("error marshaling index: %w", err)
+		}
+
+		// Set the updated index in the database
+		if err := txn.Set(indexKey, indexBytes); err != nil {
+			return fmt.Errorf("error setting index data: %w", err)
+		}
+
+		return nil
 	})
 }
 
 // ReadPage recupera uma página do banco de dados por URL
 func (d Database) ReadPage(url string) (*data.Page, error) {
 	var page data.Page
-	Key := []byte(fmt.Sprintf("%s:%s", config.PageDataIndexName, url))
+	Key := []byte(fmt.Sprintf("%s:%s", config.PageDataPrefix, url))
 
 	err := d.db.View(func(txn *badger.Txn) error {
 		item, err := txn.Get(Key)
@@ -222,7 +268,7 @@ func (d Database) AllVisited() ([]string, error) {
 // SearchByTitleOrDescription pesquisa páginas por título ou descrição
 func (d Database) SearchByTitleOrDescription(searchTerm string) ([]data.PageSearch, error) {
 	var pages []data.PageSearch
-	prefixKey := []byte(fmt.Sprintf("%s:", config.PageDataIndexName))
+	prefixKey := []byte(fmt.Sprintf("%s:", config.PageDataPrefix))
 
 	err := d.db.View(func(txn *badger.Txn) error {
 		opts := badger.DefaultIteratorOptions
@@ -256,7 +302,7 @@ func (d Database) SearchByTitleOrDescription(searchTerm string) ([]data.PageSear
 // SearchByContent pesquisa páginas por conteúdo e ordena por frequência
 func (d Database) SearchByContent(searchTerm string) ([]data.PageSearchWithFrequency, error) {
 	var pages []data.PageSearchWithFrequency
-	prefixKey := []byte(fmt.Sprintf("%s:", config.PageDataIndexName))
+	prefixKey := []byte(fmt.Sprintf("%s:", config.PageDataPrefix))
 
 	err := d.db.View(func(txn *badger.Txn) error {
 		opts := badger.DefaultIteratorOptions
@@ -297,73 +343,41 @@ func (d Database) SearchByContent(searchTerm string) ([]data.PageSearchWithFrequ
 	return pages, nil
 }
 
-// Search queries pages by title, description, or content.
-func (d Database) Search(searchTerm string) ([]data.Page, error) {
-	var pages []data.Page
-	prefixKey := []byte(fmt.Sprintf("%s:", config.PageDataIndexName))
-
-	err := d.db.View(func(txn *badger.Txn) error {
-		opts := badger.DefaultIteratorOptions
-		opts.Prefix = prefixKey
-		it := txn.NewIterator(opts)
-		defer it.Close()
-
-		for it.Seek(prefixKey); it.ValidForPrefix(prefixKey); it.Next() {
-			item := it.Item()
-			var page data.Page
-
-			if err := item.Value(func(val []byte) error {
-				return pageUnmarshal(val, &page)
-			}); err != nil {
-				return err
-			}
-			if containsIgnoreCase(page.Title, searchTerm) ||
-				containsIgnoreCase(page.Description, searchTerm) ||
-				containsWord(page.Words, searchTerm) {
-				pages = append(pages, page)
-			}
-		}
-		return nil
-	})
-
-	return pages, err
-}
-
-func (d Database) SearchWords(searchTerms []string) ([]data.Page, error) {
-	var pages []data.Page
-	prefixKey := []byte(fmt.Sprintf("%s:", config.PageDataIndexName))
-
-	err := d.db.View(func(txn *badger.Txn) error {
-		opts := badger.DefaultIteratorOptions
-		opts.Prefix = prefixKey
-		it := txn.NewIterator(opts)
-		defer it.Close()
-
-		for it.Seek(prefixKey); it.ValidForPrefix(prefixKey); it.Next() {
-			item := it.Item()
-			var page data.Page
-
-			if err := item.Value(func(val []byte) error {
-				return pageUnmarshal(val, &page)
-			}); err != nil {
-				return err
-			}
-
-			for _, search := range searchTerms {
-				if containsWord(page.Words, search) {
-					pages = append(pages, page)
-				}
-			}
-		}
-		return nil
-	})
-
-	return pages, err
-}
+//func (d Database) SearchWords(searchTerms []string) ([]data.Page, error) {
+//	var pages []data.Page
+//	prefixKey := []byte(fmt.Sprintf("%s:", config.PageDataPrefix))
+//
+//	err := d.db.View(func(txn *badger.Txn) error {
+//		opts := badger.DefaultIteratorOptions
+//		opts.Prefix = prefixKey
+//		it := txn.NewIterator(opts)
+//		defer it.Close()
+//
+//		for it.Seek(prefixKey); it.ValidForPrefix(prefixKey); it.Next() {
+//			item := it.Item()
+//			var page data.Page
+//
+//			if err := item.Value(func(val []byte) error {
+//				return pageUnmarshal(val, &page)
+//			}); err != nil {
+//				return err
+//			}
+//
+//			for _, search := range searchTerms {
+//				if containsWord(page.Words, search) {
+//					pages = append(pages, page)
+//				}
+//			}
+//		}
+//		return nil
+//	})
+//
+//	return pages, err
+//}
 
 func (d Database) GetAllPage() ([]data.Page, error) {
 	var pages []data.Page
-	prefixKey := []byte(fmt.Sprintf("%s:", config.PageDataIndexName))
+	prefixKey := []byte(fmt.Sprintf("%s:", config.PageDataPrefix))
 
 	err := d.db.View(func(txn *badger.Txn) error {
 		opts := badger.DefaultIteratorOptions
@@ -387,10 +401,48 @@ func (d Database) GetAllPage() ([]data.Page, error) {
 
 	return pages, err
 }
+func (d Database) GetPaginatedPage(pageNumber, pageSize int) ([]data.Page, error) {
+	var pages []data.Page
+	keyIndex := []byte(config.PageDataIndexName)
 
+	err := d.db.View(func(txn *badger.Txn) error {
+		index, err := txn.Get(keyIndex)
+		if err != nil {
+			return err
+		}
+		var pageIndex data.PageIndex
+		if err := index.Value(func(val []byte) error {
+			return indexPageUnmarshal(val, &pageIndex)
+		}); err != nil {
+			return err
+		}
+
+		start := pageNumber * pageSize
+		end := start + pageSize
+		if end > len(pageIndex.Keys) {
+			end = len(pageIndex.Keys)
+		}
+		for _, key := range pageIndex.Keys[start:end] {
+			item, err := txn.Get([]byte(fmt.Sprintf("%s:%s", config.PageDataPrefix, key)))
+			if err != nil {
+				return err
+			}
+			var page data.Page
+			if err := item.Value(func(val []byte) error {
+				return pageUnmarshal(val, &page)
+			}); err != nil {
+				return err
+			}
+			pages = append(pages, page)
+		}
+		return nil
+	})
+
+	return pages, err
+}
 func (d Database) SearchV2(searchTerms []string) ([]data.Page, error) {
 	var pages []data.Page
-	prefixKey := []byte(fmt.Sprintf("%s:", config.PageDataIndexName))
+	prefixKey := []byte(fmt.Sprintf("%s:", config.PageDataPrefix))
 
 	err := d.db.View(func(txn *badger.Txn) error {
 		opts := badger.DefaultIteratorOptions
@@ -425,6 +477,7 @@ func (d Database) SearchV2(searchTerms []string) ([]data.Page, error) {
 }
 
 func (d Database) ImportData(pages []data.Page) error {
+	// TODO: checar se o dado existe no banco de dados antes de importar, um WriteCheckPage
 	var errs []error
 	for _, page := range pages {
 		err := d.WritePage(&page)
