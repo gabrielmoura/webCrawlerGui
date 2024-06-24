@@ -8,32 +8,20 @@ import {
     Input,
     InputGroup,
     InputLeftAddon,
-    Table,
-    TableContainer,
-    Tbody,
-    Td,
     Text,
-    Th,
-    Thead,
     Tooltip,
-    Tr,
     useToast
 } from "@chakra-ui/react";
 import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
 import {useState} from 'react';
-import {ArrowLeft, ArrowLeftToLine, ArrowRight, ArrowRightToLine, CircleX, Plus} from "lucide-react";
+import {CircleX, Plus} from "lucide-react";
 import {QueueService, URL} from "../services/queue";
-import {
-    createColumnHelper,
-    flexRender,
-    getCoreRowModel,
-    getPaginationRowModel,
-    PaginationState,
-    useReactTable
-} from '@tanstack/react-table';
+import {createColumnHelper} from '@tanstack/react-table';
 import {useTranslation} from "react-i18next";
 import useAppStore from "../store/appStore.ts";
 import {AddHostsTxt} from "../components/AddHostsTxt.tsx";
+import {onEnter} from "../util/helper.ts";
+import {GenericTable} from "../components/GenericTable.tsx";
 
 export const Route = createFileRoute('/queue')({
     component: ShowQueueList
@@ -55,7 +43,7 @@ function ShowQueueList() {
     const mutateCreate = useMutation({
         mutationKey: ['queue', 'set'],
         mutationFn: async (url: string) => QueueService.addToQueue(url),
-        onSuccess: async (msg) => {
+        onSuccess: (msg) => {
             setUrl('')
             toast({
                 title: t(`msg.${msg}`),
@@ -63,14 +51,17 @@ function ShowQueueList() {
                 duration: 9000,
                 isClosable: true,
             })
-            await client.invalidateQueries({queryKey: ['queue', 'get']})
+            client.refetchQueries({queryKey: ['queue', 'get']}).catch(console.error)
+
         },
-        onError: (msg) => toast({
-            title: t(`msg.${msg}`),
-            status: 'error',
-            duration: 9000,
-            isClosable: true,
-        })
+        onError: (msg) => {
+            toast({
+                title: t(`msg.${msg}`),
+                status: 'error',
+                duration: 9000,
+                isClosable: true,
+            })
+        }
     })
 
     const mutateDelete = useMutation({
@@ -84,12 +75,14 @@ function ShowQueueList() {
                 duration: 9000,
                 isClosable: true,
             })
-        }, onError: (msg) => toast({
-            title: t(`msg.${msg}`),
-            status: 'error',
-            duration: 9000,
-            isClosable: true,
-        })
+        }, onError: (msg) => {
+            toast({
+                title: t(`msg.${msg}`),
+                status: 'error',
+                duration: 9000,
+                isClosable: true,
+            })
+        }
     })
 
     function handleAddToQueue() {
@@ -129,33 +122,22 @@ function ShowQueueList() {
             ),
         }),
     ];
-    const [pagination, setPagination] = useState<PaginationState>({
-        pageIndex: 0,
-        pageSize: 10,
-    })
 
-    const table = useReactTable({
-        data,
-        columns,
-        getCoreRowModel: getCoreRowModel(),
-        getPaginationRowModel: getPaginationRowModel(),
-        state: {
-            pagination,
-        },
-        onPaginationChange: setPagination,
-    });
 
     return (
         <Box maxH='90vh'>
             <Text fontSize='6xl'>{t('queue_list')}</Text>
             <Flex direction={'column'}>
-                <Center my={'0.5rem'}>
+                <Center my={'0.5rem'} gap={1}>
                     <InputGroup>
                         <InputLeftAddon>Url</InputLeftAddon>
                         <Input type='text' placeholder={t('placeholder.url')}
-                               onChange={({target}) => setUrl(target.value)}/>
+                               value={url}
+                               onChange={({target}) => setUrl(target.value)}
+                               onKeyDown={e => onEnter(e, handleAddToQueue)}
+                        />
                     </InputGroup>
-                    <Button onClick={() => handleAddToQueue()}>
+                    <Button onClick={() => handleAddToQueue()} isLoading={mutateCreate.isPending}>
                         <Tooltip label={t('btn.include')}>
                             <Plus/>
                         </Tooltip>
@@ -163,76 +145,7 @@ function ShowQueueList() {
                 </Center>
 
                 {importsEnabled ? <AddHostsTxt/> : null}
-
-                <TableContainer>
-                    <Table variant='striped'>
-                        <Thead>
-                            {table.getHeaderGroups().map(headerGroup => (
-                                <Tr key={headerGroup.id}>
-                                    {headerGroup.headers.map(header => (
-                                        <Th key={header.id}>
-                                            {flexRender(
-                                                header.column.columnDef.header,
-                                                header.getContext()
-                                            )}
-                                        </Th>
-                                    ))}
-                                </Tr>
-                            ))}
-                        </Thead>
-                        <Tbody>
-                            {table.getRowModel().rows.map(row => (
-                                <Tr key={row.id}>
-                                    {row.getVisibleCells().map(cell => (
-                                        <Td key={cell.id} maxW={'70vw'}>
-                                            {flexRender(
-                                                cell.column.columnDef.cell,
-                                                cell.getContext()
-                                            )}
-                                        </Td>
-                                    ))}
-                                </Tr>
-                            ))}
-                        </Tbody>
-                    </Table>
-                    <Center>
-                        <Flex gap={5}>
-                            <IconButton
-                                className="border rounded p-1"
-                                onClick={() => table.firstPage()}
-                                disabled={!table.getCanPreviousPage()}
-                                aria-label={t('btn.first')}
-                                icon={<ArrowLeftToLine/>}
-                            />
-                            <IconButton
-                                className="border rounded p-1"
-                                onClick={() => table.previousPage()}
-                                disabled={!table.getCanPreviousPage()}
-                                aria-label={t('btn.back')}
-                                icon={<ArrowLeft/>}
-                            />
-                            <Text w={170} h={10}>
-                                {table.getState().pagination.pageIndex + 1} {t('of')}{' '}
-                                {table.getPageCount().toLocaleString()} {t('of')} {table.getRowCount().toLocaleString()} {t('rows')}
-                            </Text>
-                            <IconButton
-                                className="border rounded p-1"
-                                onClick={() => table.nextPage()}
-                                disabled={!table.getCanNextPage()}
-                                icon={<ArrowRight/>}
-                                aria-label={t('btn.next')}
-                            />
-                            <IconButton
-                                className="border rounded p-1"
-                                onClick={() => table.lastPage()}
-                                disabled={!table.getCanNextPage()}
-                                icon={<ArrowRightToLine/>}
-                                aria-label={t('btn.last')}
-                            />
-                        </Flex>
-                    </Center>
-
-                </TableContainer>
+                {data && data.length > 0 ? <GenericTable data={data} columns={columns}/> : null}
             </Flex>
         </Box>
     );

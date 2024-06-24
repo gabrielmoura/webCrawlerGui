@@ -1,20 +1,25 @@
-import {Search, SearchWords} from "../../wailsjs/go/services/CrawlerService";
+import {SearchWords} from "../../wailsjs/go/services/CrawlerService";
 
+export interface MetaData {
+    og: { [key: string]: string };
+    keywords: string[];
+    manifest: string;
+    ld: string;
+}
+
+export interface Page {
+    url: string;
+    links: string[];
+    title: string;
+    description: string;
+    meta?: MetaData;
+    visited: boolean;
+    timestamp: Date;
+    words: { [key: string]: number };
+}
 
 export class SearchService {
-    /**
-     * Pesquisa páginas por título, descrição ou conteúdo
-     * @param query - Termo de pesquisa
-     */
-    static async search(query: string) {
-        const rest = await Search(query)
-        if (rest.success) {
-            return Promise.resolve(rest.data)
-        }
-        return Promise.reject(rest.msg)
-    }
-
-    static async searchWords(query: string) {
+    static async searchWords(query: string): Promise<Array<Page>> {
         // separe as palavras por espaço
         const words = query.split(' ')
 

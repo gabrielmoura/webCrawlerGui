@@ -1,7 +1,8 @@
-import {Dispatch, KeyboardEvent, SetStateAction, useState} from "react";
+import {Dispatch, SetStateAction, useState} from "react";
 import {Button, Flex, Input, InputGroup, InputRightElement, Text, Tooltip,} from "@chakra-ui/react";
 import {Ban, Plus} from "lucide-react";
 import {useTranslation} from "react-i18next";
+import {onEnter} from "../util/helper.ts";
 
 interface TagInputProps {
     tags: string[];
@@ -34,12 +35,6 @@ export const TagInput = ({
 
     const showInput = () => {
         setInputVisible(true);
-    };
-
-    const handleInputKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
-        if (e.key === "Enter") {
-            handleAddTag();
-        }
     };
     const flushData = () => {
         setTags([]);
@@ -91,7 +86,7 @@ export const TagInput = ({
                         isInvalid={err}
                         placeholder={placeholder}
                         value={newTag}
-                        onKeyDown={handleInputKeyDown}
+                        onKeyDown={e => onEnter(e, handleAddTag)}
                         onChange={(e) => setNewTag(e.target.value)}
                     />
                     <InputRightElement width="8rem">

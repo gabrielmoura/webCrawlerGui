@@ -31,3 +31,15 @@ export function resumeStringV2(text: string, maxLength: number) {
 
     return result;
 }
+
+/**
+ * Função para chamar um callback quando a tecla Enter for pressionada
+ * Usado preferencialmente com onKeyDown
+ * @param event
+ * @param callback
+ */
+export function onEnter(event: any, callback: () => void) {
+    if (event.key === 'Enter') {
+        callback()
+    }
+}

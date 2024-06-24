@@ -1,19 +1,23 @@
-import React, {ReactNode, useState} from 'react';
-import {Box, Center, Collapse, IconButton, Text, VStack} from '@chakra-ui/react';
-import {ChevronDown, ChevronRight} from "lucide-react";
+import React, {useState} from 'react';
+import {Box, Center, Collapse, IconButton, Text, Tooltip, useToast, VStack} from '@chakra-ui/react';
+import {ChevronDown, ChevronRight, CircleX} from "lucide-react";
+import {useTranslation} from "react-i18next";
+import {useMutation} from "@tanstack/react-query";
+import {QueueService} from "../services/queue.ts";
 
-interface TreeNode {
+export interface TreeNode {
     title: string;
     description?: string;
-    action?: ReactNode;
+    url: string;
     children?: TreeNode[];
+
 }
 
 interface TreeProps {
     nodes: TreeNode[];
 }
 
-const Tree: React.FC<TreeProps> = ({nodes}) => {
+const TreeLink: React.FC<TreeProps> = ({nodes}) => {
     const renderTree = (nodes: TreeNode[]) => {
         return nodes.map((node, index) => <TreeNodeComponent key={index} node={node}/>);
     };
@@ -28,8 +32,36 @@ interface TreeNodeComponentProps {
 const TreeNodeComponent: React.FC<TreeNodeComponentProps> = ({node}) => {
     const [isOpen, setIsOpen] = useState(false);
     const hasChildren = node.children && node.children.length > 0;
+    const {t} = useTranslation();
+    const toast = useToast()
 
     const toggle = () => setIsOpen(!isOpen);
+
+    function handleDeleteFromQueue(url: string) {
+        if (url) {
+            mutateDelete.mutate(url)
+        }
+    }
+
+    const mutateDelete = useMutation({
+        mutationKey: ['queue', 'delete'],
+        mutationFn: async (url: string) => QueueService.removeFromQueue(url),
+        onSuccess: async (msg) => {
+            toast({
+                title: t(`msg.${msg}`),
+                status: 'success',
+                duration: 9000,
+                isClosable: true,
+            })
+        }, onError: (msg) => {
+            toast({
+                title: t(`msg.${msg}`),
+                status: 'error',
+                duration: 9000,
+                isClosable: true,
+            })
+        }
+    })
 
     return (
         <VStack align="start" pl={4} mt={2} spacing={1} borderLeft="2px solid" borderColor="gray.200">
@@ -46,14 +78,21 @@ const TreeNodeComponent: React.FC<TreeNodeComponentProps> = ({node}) => {
                 <Box>
                     <Center>
                         <Box>
-                            <Text fontWeight="bold">{node.title}</Text>
+                            <Text fontWeight="bold" fontSize='2xl'>{node.title??node.url}</Text>
                             {node.description && (
                                 <Text fontSize="sm" color="gray.600">
                                     {node.description}
                                 </Text>
                             )}
                         </Box>
-                        {node.action && node.action}
+                        <Tooltip label={t('btn.delete')}>
+                        <IconButton
+                            onClick={() => handleDeleteFromQueue(node.url)}
+                            aria-label={t('btn.delete')}
+                            icon={<CircleX/>}
+                            size='sm'
+                        />
+                        </Tooltip>
                     </Center>
 
                 </Box>
@@ -68,4 +107,4 @@ const TreeNodeComponent: React.FC<TreeNodeComponentProps> = ({node}) => {
     );
 };
 
-export default Tree;
+export default TreeLink;

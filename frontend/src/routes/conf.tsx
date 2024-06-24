@@ -45,11 +45,12 @@ function ConfigurationPage() {
             <Flex direction="column">
                 {preferences && <StackConfig pref={preferences}/>}
             </Flex>
-            <Flex direction="column">
-               <Center>
-                   <ExportData/>
-                   <ImportData/>
-               </Center>
+            <Flex direction="column" gap={1}>
+                <Text align='center'>{t('msg.time_wait')}</Text>
+                <Center>
+                    <ExportData/>
+                    <ImportData/>
+                </Center>
 
             </Flex>
         </Stack>

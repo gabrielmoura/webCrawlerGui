@@ -11,6 +11,7 @@ interface LinkExternalProps {
 
 export function LinkExternal({url, maxLength = 80}: LinkExternalProps) {
     const {t} = useTranslation();
+
     function handleClipboard() {
         ClipboardSetText(url).catch(console.error);
     }
@@ -22,7 +23,8 @@ export function LinkExternal({url, maxLength = 80}: LinkExternalProps) {
             </Link>
         </Tooltip>
         <Tooltip label={t('btn.copyToClipboard')}>
-            <IconButton aria-label={t('btn.copyToClipboard')} onClick={() => handleClipboard()} icon={<ClipboardCopy/>}/>
+            <IconButton aria-label={t('btn.copyToClipboard')} onClick={() => handleClipboard()}
+                        icon={<ClipboardCopy/>}/>
         </Tooltip>
     </Stack>
 

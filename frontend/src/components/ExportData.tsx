@@ -40,6 +40,7 @@ export function ExportData() {
                     icon={<HardDriveDownload/>}
                     aria-label={t('export_label')}
                     onClick={() => mutExportData.mutate()}
+                    isLoading={mutExportData.isPending}
                 />
             </Tooltip>
         </Stack>

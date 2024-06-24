@@ -40,6 +40,7 @@ export function ImportData() {
                     icon={<HardDriveUpload/>}
                     aria-label={t('import_label')}
                     onClick={() => mutImportData.mutate()}
+                    isLoading={mutImportData.isPending}
                 />
             </Tooltip>
         </Stack>

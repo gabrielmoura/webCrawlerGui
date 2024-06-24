@@ -1,7 +1,7 @@
 import {useMutation} from '@tanstack/react-query'
 import {createFileRoute} from '@tanstack/react-router'
 import {useState} from 'react'
-import {SearchService} from '../services/search'
+import {Page, SearchService} from '../services/search'
 import {
     Box,
     Center,
@@ -11,17 +11,15 @@ import {
     InputGroup,
     InputLeftAddon,
     Spinner,
-    Table,
-    Tbody,
-    Td,
     Text,
-    Thead,
-    Tooltip,
-    Tr
+    Tooltip
 } from '@chakra-ui/react'
 import {Search} from 'lucide-react'
 import {useTranslation} from "react-i18next";
 import {LinkExternal} from "../components/LinkExternal.tsx";
+import {onEnter} from "../util/helper.ts";
+import {createColumnHelper} from "@tanstack/react-table";
+import {GenericTable} from "../components/GenericTable.tsx";
 
 
 export const Route = createFileRoute('/')({
@@ -32,7 +30,7 @@ export const Route = createFileRoute('/')({
 function SearchPage() {
     const {t} = useTranslation()
     const [searchString, setSearch] = useState<string>()
-    const [data, setData] = useState<any>([])
+    const [data, setData] = useState<Array<Page>>([])
     const mutSearch = useMutation({
         mutationKey: ['search', {searchString}],
         mutationFn: (query: string) => SearchService.searchWords(query),
@@ -47,22 +45,36 @@ function SearchPage() {
         }
     }
 
-    function handleEnter(e: any) {
-        if (e.key === 'Enter') {
-            HandleSearch()
-        }
-    }
+    const columnHelper = createColumnHelper<Page>();
+    const columns = [
+        columnHelper.accessor('url', {
+            cell: info => <LinkExternal url={info.getValue()}/>,
+            footer: info => info.column.id,
+        }),
+        columnHelper.accessor('title', {
+            id: 'title',
+            cell: info => <i>{info.getValue()}</i>,
+            header: () => <span>{t('title')}</span>,
+            footer: info => info.column.id,
+        }),
+        columnHelper.accessor('description', {
+            id: 'description',
+            cell: info => <i>{info.getValue()}</i>,
+            header: () => <span>{t('description')}</span>,
+            footer: info => info.column.id,
+        }),
+    ];
 
 
     return (
         <Box>
             <Flex gap='2' direction={'column'}>
-                <Center>
+                <Center gap={1}>
                     <InputGroup>
                         <InputLeftAddon>{t('btn.search')}</InputLeftAddon>
                         <Input type='text' placeholder={t('placeholder.search')}
                                onChange={(e) => setSearch(e.target.value)}
-                               onKeyDown={handleEnter}
+                               onKeyDown={e => onEnter(e, HandleSearch)}
                         />
                     </InputGroup>
                     <Tooltip label={t('btn.search')}>
@@ -70,33 +82,9 @@ function SearchPage() {
                                     onClick={() => HandleSearch()}/>
                     </Tooltip>
                 </Center>
-                {data?.length > 0 ? <Text>{data?.length} {t('results_found')}</Text> : null}
+                {mutSearch.isSuccess && data?.length > 0 ? <Text>{data?.length} {t('results_found')}</Text> : null}
                 {mutSearch.isError && <div>Error</div>}
-                {mutSearch.isSuccess && (
-                    <Table>
-                        <Thead>
-                            <Tr>
-                                <Td>URL</Td>
-                                <Td>{t('title')}</Td>
-                                <Td>{t('description')}</Td>
-                            </Tr>
-                        </Thead>
-                        {data?.map((item: any) => (
-                            <Tbody>
-                                <Tr>
-                                    <Td>
-                                        <LinkExternal url={item?.url}/>
-                                    </Td>
-                                    <Td>{item?.title}</Td>
-                                    <Td>{item?.description}</Td>
-                                </Tr>
-                            </Tbody>
-                        ))
-                        }
-                    </Table>
-                )}
-
-
+                {mutSearch.isSuccess && (<GenericTable data={data} columns={columns}/>)}
             </Flex>
         </Box>
     )

@@ -51,6 +51,7 @@
   },
   "msg": {
     "welcome": "Welcome to Scrawler",
+    "time_wait": "The features below may take longer or shorter depending on the volume of data.",
     "Error exporting data": "Error exporting data",
     "No data to export": "No data to export",
     "Error getting data": "Error getting data",

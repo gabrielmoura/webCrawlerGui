@@ -22,6 +22,10 @@ export function GetPaginatedQueue(arg1) {
   return window['go']['services']['CrawlerService']['GetPaginatedQueue'](arg1);
 }
 
+export function GetTreePages(arg1, arg2) {
+  return window['go']['services']['CrawlerService']['GetTreePages'](arg1, arg2);
+}
+
 export function Handle(arg1) {
   return window['go']['services']['CrawlerService']['Handle'](arg1);
 }
@@ -32,10 +36,6 @@ export function HandleClose() {
 
 export function RemoveFromQueueByHost(arg1) {
   return window['go']['services']['CrawlerService']['RemoveFromQueueByHost'](arg1);
-}
-
-export function Search(arg1) {
-  return window['go']['services']['CrawlerService']['Search'](arg1);
 }
 
 export function SearchWords(arg1) {

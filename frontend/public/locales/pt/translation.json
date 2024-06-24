@@ -51,6 +51,7 @@
   },
   "msg": {
     "welcome": "Bem vindo ao Buscador",
+    "time_wait": "As funcionalidades abaixo podem demorar mais ou menos de acordo com o volume de dados.",
     "Error exporting data": "Erro ao exportar dados",
     "No data to export": "Nenhum dado para exportar",
     "Error getting data": "Erro ao obter dados",
