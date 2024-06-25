@@ -95,7 +95,7 @@ func (c CrawlerService) RemoveFromQueueByHost(host string) types.JSResp {
 			Msg:     "Error removing URL from queue",
 		}
 	}
-	err = db.DB.DeletePrefix(fmt.Sprintf("%s://%s", link.Scheme, link.Host))
+	err = db.DB.DeleteQueuePrefix(fmt.Sprintf("%s://%s", link.Scheme, link.Host))
 	if err != nil {
 		log.Logger.Error("Error removing URL from queue", zap.Error(err))
 		return types.JSResp{
@@ -166,7 +166,7 @@ func (c CrawlerService) AddHotsTxt(url string) types.JSResp {
 }
 
 func (c CrawlerService) GetPaginatedQueue(pag types.Paginated) types.JSResp {
-	queue, err := db.DB.ReadPaginated(pag.Limit, pag.Offset)
+	queue, err := db.DB.ReadQueuePaginated(pag.Limit, pag.Offset)
 	if err != nil {
 		log.Logger.Error("Error getting queue", zap.Error(err))
 		return types.JSResp{
@@ -188,7 +188,7 @@ func (c CrawlerService) GetPaginatedQueue(pag types.Paginated) types.JSResp {
 }
 
 func (c CrawlerService) GetAllQueue() types.JSResp {
-	queue, err := db.DB.Read()
+	queue, err := db.DB.GetAllQueue()
 	if err != nil {
 		log.Logger.Error("Error getting queue", zap.Error(err))
 		return types.JSResp{
@@ -209,7 +209,7 @@ func (c CrawlerService) GetAllQueue() types.JSResp {
 	}
 }
 func (c CrawlerService) DeleteQueue(url string) types.JSResp {
-	err := db.DB.Delete(url)
+	err := db.DB.DeleteQueue(url)
 	if err != nil {
 		return types.JSResp{
 			Success: false,
@@ -286,5 +286,52 @@ func (c CrawlerService) GetTreePages(pageN, size int) types.JSResp {
 	return types.JSResp{
 		Success: true,
 		Data:    treeNodes,
+	}
+}
+
+func (c CrawlerService) GetAllFailed() types.JSResp {
+	failed, err := db.DB.GetAllFailed()
+	if err != nil {
+		log.Logger.Error("Error getting failed", zap.Error(err))
+		return types.JSResp{
+			Success: false,
+			Msg:     "Error getting failed",
+		}
+	}
+	if len(failed) == 0 {
+		return types.JSResp{
+			Success: true,
+			Msg:     "There is no data to display",
+		}
+	}
+	return types.JSResp{
+		Success: true,
+		Data:    failed,
+	}
+}
+func (c CrawlerService) DeleteFailed(url string) types.JSResp {
+	err := db.DB.DeleteFailed(url)
+	if err != nil {
+		return types.JSResp{
+			Success: false,
+			Msg:     "Error deleting failed",
+		}
+	}
+	return types.JSResp{
+		Success: true,
+		Msg:     "Failed deleted",
+	}
+}
+func (c CrawlerService) DeleteAllFailed(prefix string) types.JSResp {
+	err := db.DB.DeleteFailedPrefix(prefix)
+	if err != nil {
+		return types.JSResp{
+			Success: false,
+			Msg:     "Error deleting failed",
+		}
+	}
+	return types.JSResp{
+		Success: true,
+		Msg:     "Failed deleted",
 	}
 }

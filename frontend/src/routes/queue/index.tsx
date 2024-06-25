@@ -1,4 +1,4 @@
-import {createFileRoute} from '@tanstack/react-router'
+import {createFileRoute, Link} from '@tanstack/react-router'
 import {
     Box,
     Button,
@@ -15,15 +15,15 @@ import {
 import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
 import {useState} from 'react';
 import {CircleX, Plus} from "lucide-react";
-import {QueueService, URL} from "../services/queue";
+import {QueueService, URL} from "../../services/queue";
 import {createColumnHelper} from '@tanstack/react-table';
 import {useTranslation} from "react-i18next";
-import useAppStore from "../store/appStore.ts";
-import {AddHostsTxt} from "../components/AddHostsTxt.tsx";
-import {onEnter} from "../util/helper.ts";
-import {GenericTable} from "../components/GenericTable.tsx";
+import useAppStore from "../../store/appStore.ts";
+import {AddHostsTxt} from "../../components/AddHostsTxt.tsx";
+import {onEnter} from "../../util/helper.ts";
+import {GenericTable} from "../../components/GenericTable.tsx";
 
-export const Route = createFileRoute('/queue')({
+export const Route = createFileRoute('/queue/')({
     component: ShowQueueList
 })
 
@@ -102,6 +102,7 @@ function ShowQueueList() {
         columnHelper.accessor('url', {
             cell: info => <span className='font-bold text-blue-500 hover:underline'>{info.getValue()}</span>,
             footer: info => info.column.id,
+            enableSorting: false,
         }),
         columnHelper.accessor('depth', {
             id: 'depth',
@@ -120,6 +121,7 @@ function ShowQueueList() {
                     icon={<CircleX/>}
                 />
             ),
+            enableSorting: false,
         }),
     ];
 
@@ -143,6 +145,12 @@ function ShowQueueList() {
                         </Tooltip>
                     </Button>
                 </Center>
+                <Link to='/queue/failed'>
+                    <Button>
+                        <Text fontSize='xl' color='blue.500'>{t('queue_failed')}</Text>
+                    </Button>
+                </Link>
+
 
                 {importsEnabled ? <AddHostsTxt/> : null}
                 {data && data.length > 0 ? <GenericTable data={data} columns={columns}/> : null}

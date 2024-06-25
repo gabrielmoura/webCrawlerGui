@@ -18,6 +18,8 @@
   "of": "of",
   "rows": "Rows",
   "results_found": "Results Found",
+  "failed_list": "Failed List",
+  "queue_failed": "Queue Failed",
   "btn": {
     "update": "Update",
     "search": "Search",
@@ -34,7 +36,8 @@
     "access": "Access",
     "copyToClipboard": "Copy to Clipboard",
     "hideToTray": "Hide to Tray",
-    "close": "Close"
+    "close": "Close",
+    "retry": "Retry"
   },
   "placeholder": {
     "search": "Search on scrawler",

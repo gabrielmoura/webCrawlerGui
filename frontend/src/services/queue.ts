@@ -1,12 +1,15 @@
 import {
     AddHotsTxt,
     AddToQueue,
+    DeleteAllFailed,
+    DeleteFailed,
     DeleteQueue,
+    GetAllFailed,
     GetAllQueue,
     GetTreePages,
     RemoveFromQueueByHost,
     Start,
-    Stop
+    Stop,
 } from "../../wailsjs/go/services/CrawlerService";
 import {TreeNode} from "../components/TreeLink.tsx";
 
@@ -20,6 +23,11 @@ export type URL = Url
 export interface Pagination {
     pageNumber: number;
     pageSize: number;
+}
+
+export interface FailedType {
+    url: string;
+    reason?: string;
 }
 
 export class QueueService {
@@ -112,4 +120,27 @@ export class QueueService {
         return Promise.reject(res.msg)
     }
 
+    static async getAllFailed(): Promise<FailedType[]> {
+        const res = await GetAllFailed()
+        if (res.success) {
+            return Promise.resolve(res.data)
+        }
+        return Promise.reject(res.msg)
+    }
+
+    static async deleteFailed(url: string): Promise<string> {
+        const res = await DeleteFailed(url)
+        if (res.success) {
+            return Promise.resolve(res.msg)
+        }
+        return Promise.reject(res.msg)
+    }
+
+    static async deleteAllFailed(): Promise<string> {
+        const res = await DeleteAllFailed("")
+        if (res.success) {
+            return Promise.resolve(res.msg)
+        }
+        return Promise.reject(res.msg)
+    }
 }

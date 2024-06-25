@@ -5,6 +5,7 @@ import (
 	"WebCrawlerGui/backend/infra/db"
 	"WebCrawlerGui/backend/infra/log"
 	"errors"
+	"fmt"
 	"go.uber.org/zap"
 	"net/http"
 	"net/url"
@@ -146,23 +147,26 @@ func prepareParentLink(parentLink, link string) (*url.URL, error) {
 	return nURL, nil
 }
 func isStatusErr(status int, url *url.URL) bool {
-	if isSuccess(status) && isI2P(url) && url.Query().Has("i2paddresshelper") {
-		handleListHelperI2P(url.String())
-		return true
+	if isSuccess(status) {
+		if isI2P(url) && url.Query().Has("i2paddresshelper") {
+			handleListHelperI2P(url.String())
+			return true
+		}
+	} else {
+		err := db.DB.AddToFailed(url.String(), fmt.Sprintf("Status: %d", status))
+		if err != nil {
+			log.Logger.Error("error adding failed link", zap.String("URL", url.String()), zap.Error(err))
+		}
 	}
 
-	switch status {
-	case http.StatusConflict:
+	if status == http.StatusConflict {
 		if isI2P(url) {
 			handleListHelperI2P(url.String())
 		}
 		return true
-	case http.StatusTooManyRequests:
-		// TODO: Adicionar URL na lista de espera, pois o proxy pode estar bloqueando
-		return true
-	default:
-		return !isSuccess(status)
 	}
+
+	return !isSuccess(status)
 }
 
 func isSuccess(status int) bool {

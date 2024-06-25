@@ -18,6 +18,8 @@
   "of": "de",
   "rows": "Linhas",
   "results_found": "Resultados encontrados",
+  "failed_list": "Listagem de falhas",
+  "queue_failed": "Fila de falhas",
   "btn": {
     "update": "Atualizar",
     "search": "Buscar",
@@ -34,7 +36,8 @@
     "access": "Acessar",
     "copyToClipboard": "Copiar para a Área de Transferência",
     "hideToTray": "Esconder para a Bandeja",
-    "close": "Fechar"
+    "close": "Fechar",
+    "retry": "Tentar Novamente"
   },
   "placeholder": {
     "search": "Buscar em scrawler",

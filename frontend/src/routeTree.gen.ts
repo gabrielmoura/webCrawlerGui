@@ -11,16 +11,12 @@
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
-import { Route as QueueImport } from './routes/queue'
 import { Route as ConfImport } from './routes/conf'
 import { Route as IndexImport } from './routes/index'
+import { Route as QueueIndexImport } from './routes/queue/index'
+import { Route as QueueFailedImport } from './routes/queue/failed'
 
 // Create/Update Routes
-
-const QueueRoute = QueueImport.update({
-  path: '/queue',
-  getParentRoute: () => rootRoute,
-} as any)
 
 const ConfRoute = ConfImport.update({
   path: '/conf',
@@ -29,6 +25,16 @@ const ConfRoute = ConfImport.update({
 
 const IndexRoute = IndexImport.update({
   path: '/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const QueueIndexRoute = QueueIndexImport.update({
+  path: '/queue/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const QueueFailedRoute = QueueFailedImport.update({
+  path: '/queue/failed',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -50,11 +56,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ConfImport
       parentRoute: typeof rootRoute
     }
-    '/queue': {
-      id: '/queue'
+    '/queue/failed': {
+      id: '/queue/failed'
+      path: '/queue/failed'
+      fullPath: '/queue/failed'
+      preLoaderRoute: typeof QueueFailedImport
+      parentRoute: typeof rootRoute
+    }
+    '/queue/': {
+      id: '/queue/'
       path: '/queue'
       fullPath: '/queue'
-      preLoaderRoute: typeof QueueImport
+      preLoaderRoute: typeof QueueIndexImport
       parentRoute: typeof rootRoute
     }
   }
@@ -65,7 +78,8 @@ declare module '@tanstack/react-router' {
 export const routeTree = rootRoute.addChildren({
   IndexRoute,
   ConfRoute,
-  QueueRoute,
+  QueueFailedRoute,
+  QueueIndexRoute,
 })
 
 /* prettier-ignore-end */
@@ -78,7 +92,8 @@ export const routeTree = rootRoute.addChildren({
       "children": [
         "/",
         "/conf",
-        "/queue"
+        "/queue/failed",
+        "/queue/"
       ]
     },
     "/": {
@@ -87,8 +102,11 @@ export const routeTree = rootRoute.addChildren({
     "/conf": {
       "filePath": "conf.tsx"
     },
-    "/queue": {
-      "filePath": "queue.tsx"
+    "/queue/failed": {
+      "filePath": "queue/failed.tsx"
+    },
+    "/queue/": {
+      "filePath": "queue/index.tsx"
     }
   }
 }

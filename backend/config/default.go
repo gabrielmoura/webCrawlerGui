@@ -1,9 +1,11 @@
 package config
 
-var QueueName = "queueIndex"
+var QueueDataPrefix = "queueIndex"
 var VisitedIndexName = "visitedIndex"
 var PageDataIndexName = "pageDataIndex"
 var PageDataPrefix = "pageData"
+
+var PrefixFailedData = "failed"
 
 // AcceptableMimeTypes Mimes aceitos, checagem quando visitado
 var AcceptableMimeTypes = []string{

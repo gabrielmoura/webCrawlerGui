@@ -10,8 +10,16 @@ export function ExportData() {
   return window['go']['services']['SystemService']['ExportData']();
 }
 
+export function ExportQueue() {
+  return window['go']['services']['SystemService']['ExportQueue']();
+}
+
 export function ImportData() {
   return window['go']['services']['SystemService']['ImportData']();
+}
+
+export function ImportQueue() {
+  return window['go']['services']['SystemService']['ImportQueue']();
 }
 
 export function Info() {

@@ -50,6 +50,7 @@ function SearchPage() {
         columnHelper.accessor('url', {
             cell: info => <LinkExternal url={info.getValue()}/>,
             footer: info => info.column.id,
+            enableSorting: false,
         }),
         columnHelper.accessor('title', {
             id: 'title',

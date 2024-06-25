@@ -10,8 +10,20 @@ export function AddToQueue(arg1) {
   return window['go']['services']['CrawlerService']['AddToQueue'](arg1);
 }
 
+export function DeleteAllFailed(arg1) {
+  return window['go']['services']['CrawlerService']['DeleteAllFailed'](arg1);
+}
+
+export function DeleteFailed(arg1) {
+  return window['go']['services']['CrawlerService']['DeleteFailed'](arg1);
+}
+
 export function DeleteQueue(arg1) {
   return window['go']['services']['CrawlerService']['DeleteQueue'](arg1);
+}
+
+export function GetAllFailed() {
+  return window['go']['services']['CrawlerService']['GetAllFailed']();
 }
 
 export function GetAllQueue() {

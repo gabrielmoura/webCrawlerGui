@@ -8,7 +8,11 @@ export function CheckForUpdate():Promise<types.JSResp>;
 
 export function ExportData():Promise<types.JSResp>;
 
+export function ExportQueue():Promise<types.JSResp>;
+
 export function ImportData():Promise<types.JSResp>;
+
+export function ImportQueue():Promise<types.JSResp>;
 
 export function Info():Promise<types.JSResp>;
 

@@ -7,7 +7,13 @@ export function AddHotsTxt(arg1:string):Promise<types.JSResp>;
 
 export function AddToQueue(arg1:string):Promise<types.JSResp>;
 
+export function DeleteAllFailed(arg1:string):Promise<types.JSResp>;
+
+export function DeleteFailed(arg1:string):Promise<types.JSResp>;
+
 export function DeleteQueue(arg1:string):Promise<types.JSResp>;
+
+export function GetAllFailed():Promise<types.JSResp>;
 
 export function GetAllQueue():Promise<types.JSResp>;
 

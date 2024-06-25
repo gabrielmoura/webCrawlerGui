@@ -44,3 +44,8 @@ type QueueType struct {
 type PageIndex struct {
 	Keys []string `json:"url,omitempty"` // Lista ordenada de chaves para as páginas
 }
+
+type FailedType struct {
+	Url    string `json:"url"`
+	Reason string `json:"reason,omitempty"`
+}

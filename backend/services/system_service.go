@@ -315,3 +315,101 @@ func (s *SystemService) ImportData() types.JSResp {
 		Msg:     "Data imported",
 	}
 }
+func (s *SystemService) ImportQueue() types.JSResp {
+	openDialogOptions := runtime.OpenDialogOptions{
+		Title:           "Import Queue",
+		DefaultFilename: "queue.json",
+		Filters: []runtime.FileFilter{
+			{DisplayName: "JSON Files", Pattern: "*.json"},
+		},
+	}
+	filename, err := runtime.OpenFileDialog(s.ctx, openDialogOptions)
+	if err != nil {
+		log.Logger.Error("Error opening file", zap.Error(err))
+		return types.JSResp{
+			Success: false,
+			Msg:     "Error opening file",
+		}
+	}
+
+	data, err := os.ReadFile(filename)
+	if err != nil {
+		return types.JSResp{
+			Success: false,
+			Msg:     "Error reading file",
+		}
+	}
+	var queue []data2.QueueType
+	err = json.Unmarshal(data, &queue)
+	if err != nil {
+		return types.JSResp{
+			Success: false,
+			Msg:     "Error parsing data",
+		}
+	}
+	var errs []error
+	for _, q := range queue {
+		err := db.DB.Enqueue(q.Url, q.Depth)
+		if err != nil {
+			errs = append(errs, err)
+		}
+	}
+	if len(errs) > 0 {
+		return types.JSResp{
+			Success: false,
+			Msg:     "Error importing queue",
+		}
+	}
+	return types.JSResp{
+		Success: true,
+		Msg:     "Queue imported",
+	}
+}
+func (s *SystemService) ExportQueue() types.JSResp {
+	saveDialogOptions := runtime.SaveDialogOptions{
+		Title:           "Export Queue",
+		DefaultFilename: "queue.json",
+		Filters:         []runtime.FileFilter{{DisplayName: "JSON Files", Pattern: "*.json"}},
+	}
+	filename, err := runtime.SaveFileDialog(s.ctx, saveDialogOptions)
+	if err != nil {
+		log.Logger.Error("Error saving file", zap.Error(err))
+		return types.JSResp{
+			Success: false,
+			Msg:     "Error saving file",
+		}
+	}
+
+	data, err := db.DB.GetAllQueue()
+	if err != nil {
+		return types.JSResp{
+			Success: false,
+			Msg:     "Error getting data",
+		}
+	}
+	if len(data) == 0 {
+		return types.JSResp{
+			Success: false,
+			Msg:     "No data to export",
+		}
+	}
+	jsonData, err := json.MarshalIndent(data, "", "  ")
+	if err != nil {
+		return types.JSResp{
+			Success: false,
+			Msg:     "Error exporting data",
+		}
+	}
+
+	err = os.WriteFile(filename, jsonData, 0644)
+	if err != nil {
+		return types.JSResp{
+			Success: false,
+			Msg:     "Error exporting data",
+		}
+	}
+	return types.JSResp{
+		Success: true,
+		Msg:     "Data exported",
+	}
+}

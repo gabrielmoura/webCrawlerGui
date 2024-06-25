@@ -12,16 +12,16 @@ type Queue interface {
 	Enqueue(url string, depth int) error
 	Dequeue() (string, int, error)
 
-	Read() ([]data.QueueType, error)
-	Delete(url string) error
-	DeletePrefix(prefix string) error
+	GetAllQueue() ([]data.QueueType, error)
+	DeleteQueue(url string) error
+	DeleteQueuePrefix(prefix string) error
 }
 
 // Enqueue adds a URL to the queue.
 func (d Database) Enqueue(url string, depth int) error {
 	blockWrite.RLock()
 	defer blockWrite.RUnlock()
-	key := []byte(fmt.Sprintf("%s:%s", config.QueueName, url))
+	key := []byte(fmt.Sprintf("%s:%s", config.QueueDataPrefix, url))
 	return d.db.Update(func(txn *badger.Txn) error {
 		return txn.Set(key, []byte(strconv.Itoa(depth)))
 	})
@@ -41,7 +41,7 @@ func (d Database) Dequeue() (string, int, error) {
 		it := txn.NewIterator(opts)
 		defer it.Close()
 
-		prefix := []byte(config.QueueName)
+		prefix := []byte(config.QueueDataPrefix)
 		for it.Seek(prefix); it.ValidForPrefix(prefix); it.Next() {
 			item := it.Item()
 			url = string(item.KeyCopy(nil)) // Copy the key to avoid issues
@@ -62,19 +62,19 @@ func (d Database) Dequeue() (string, int, error) {
 	}
 
 	if url != "" {
-		url = url[len(config.QueueName)+1:]
+		url = url[len(config.QueueDataPrefix)+1:]
 	}
 
 	return url, depth, nil
 }
-func (d Database) ReadPaginated(limit, offset int) ([]data.QueueType, error) {
+func (d Database) ReadQueuePaginated(limit, offset int) ([]data.QueueType, error) {
 	var urls []data.QueueType
 	err := d.db.View(func(txn *badger.Txn) error {
 		opts := badger.DefaultIteratorOptions
 		opts.PrefetchValues = true
 		it := txn.NewIterator(opts)
 		defer it.Close()
-		prefix := []byte(config.QueueName)
+		prefix := []byte(config.QueueDataPrefix)
 		count := 0
 		for it.Seek(prefix); it.ValidForPrefix(prefix); it.Next() {
 			if count >= offset && count < offset+limit {
@@ -88,7 +88,7 @@ func (d Database) ReadPaginated(limit, offset int) ([]data.QueueType, error) {
 				if err != nil {
 					return err
 				}
-				urls = append(urls, data.QueueType{Url: url[len(config.QueueName)+1:], Depth: depth})
+				urls = append(urls, data.QueueType{Url: url[len(config.QueueDataPrefix)+1:], Depth: depth})
 			}
 			count++
 		}
@@ -101,7 +101,7 @@ func (d Database) ReadPaginated(limit, offset int) ([]data.QueueType, error) {
 }
 
 // Read retrieves all URLs from the queue.
-func (d Database) Read() ([]data.QueueType, error) {
+func (d Database) GetAllQueue() ([]data.QueueType, error) {
 	var urls []data.QueueType
 
 	err := d.db.View(func(txn *badger.Txn) error {
@@ -110,7 +110,7 @@ func (d Database) Read() ([]data.QueueType, error) {
 		it := txn.NewIterator(opts)
 		defer it.Close()
 
-		prefix := []byte(config.QueueName)
+		prefix := []byte(config.QueueDataPrefix)
 		for it.Seek(prefix); it.ValidForPrefix(prefix); it.Next() {
 			item := it.Item()
 			url := string(item.KeyCopy(nil))
@@ -122,7 +122,7 @@ func (d Database) Read() ([]data.QueueType, error) {
 			if err != nil {
 				return err
 			}
-			urls = append(urls, data.QueueType{Url: url[len(config.QueueName)+1:], Depth: depth})
+			urls = append(urls, data.QueueType{Url: url[len(config.QueueDataPrefix)+1:], Depth: depth})
 		}
 		return nil
 	})
@@ -135,20 +135,20 @@ func (d Database) Read() ([]data.QueueType, error) {
 }
 
 // Delete removes a URL from the queue.
-func (d Database) Delete(url string) error {
+func (d Database) DeleteQueue(url string) error {
 	blockWrite.RLock()
 	defer blockWrite.RUnlock()
-	key := []byte(fmt.Sprintf("%s:%s", config.QueueName, url))
+	key := []byte(fmt.Sprintf("%s:%s", config.QueueDataPrefix, url))
 	return d.db.Update(func(txn *badger.Txn) error {
 		return txn.Delete(key)
 	})
 }
 
 // DeletePrefix removes all URLs with a given prefix from the queue.
-func (d Database) DeletePrefix(prefix string) error {
+func (d Database) DeleteQueuePrefix(prefix string) error {
 	blockWrite.RLock()
 	defer blockWrite.RUnlock()
-	key := []byte(fmt.Sprintf("%s:%s", config.QueueName, prefix))
+	key := []byte(fmt.Sprintf("%s:%s", config.QueueDataPrefix, prefix))
 	return d.db.Update(func(txn *badger.Txn) error {
 		opts := badger.DefaultIteratorOptions
 		opts.PrefetchValues = false
