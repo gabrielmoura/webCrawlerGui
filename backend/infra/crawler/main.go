@@ -193,7 +193,7 @@ func countWordsInText(data []byte) (map[string]int32, error) {
 
 	// Etapa 3: garante que palavras não tenham sequências de dois números consecutivos e não consistam apenas em números,
 	// exigindo pelo menos uma letra
-	numRegex := regexp.MustCompile("^(?!.*\\d{2,})[a-zA-Z0-9]*[a-zA-Z][a-zA-Z0-9]*$")
+	numRegex := regexp.MustCompile(`^[a-zA-Z0-9]*[a-zA-Z][a-zA-Z0-9]*$`)
 	stage3 := numRegex.ReplaceAll(stage2, []byte(" "))
 
 	// Etapa 4: Normalizar texto
