@@ -157,6 +157,9 @@ func isStatusErr(status int, url *url.URL) bool {
 			handleListHelperI2P(url.String())
 		}
 		return true
+	case http.StatusTooManyRequests:
+		// TODO: Adicionar URL na lista de espera, pois o proxy pode estar bloqueando
+		return true
 	default:
 		return !isSuccess(status)
 	}

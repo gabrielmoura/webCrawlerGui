@@ -1,12 +1,23 @@
 ## Web Crawler com Interface Gráfica
 
-Este projeto implementa um web crawler com interface gráfica que permite coletar, consultar e exportar informações de websites. Ele foi baseado no projeto [WebCrawler](https://github.com/gabrielmoura/webCrawler) e adiciona recursos como interface gráfica, filtros de busca, configurações avançadas e armazenamento em banco de dados.
+Este projeto implementa um web crawler com interface gráfica que permite coletar, consultar e exportar informações de websites.
+Ele foi baseado no projeto [WebCrawler](https://github.com/gabrielmoura/webCrawler) e adiciona recursos como interface gráfica, filtros de busca, configurações avançadas e armazenamento em banco de dados.
+
+### Motivação
+
+- Você é proprietário do seu próprio conteúdo e buscas.
+- Sem rastreamento.
+- Sem que terceiros tenham acesso às suas buscas.
+- Auditável.
+- Interface simples.
+- Pode ser usado com Tor e I2P.
 
 ### Funcionalidades Principais
 
 * **Pausar e Continuar Coleta:** Controle o processo de coleta de dados.
 * **Consultar Informações:** Visualize e busque dados coletados.
 * **Exportar Dados:** Salve informações em formato JSON.
+* **Importar Dados:** Carregue informações de um arquivo JSON.
 * **Armazenamento em Banco de Dados:** Utilize BadgerDB para persistência de dados.
 * **Filtros de Busca:**
   * **Profundidade:** Defina o nível máximo de profundidade na busca.

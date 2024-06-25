@@ -19,9 +19,8 @@ import (
 var (
 	// blockWrite é mutex para controle de otimização dos logs
 	blockWrite sync.RWMutex
+	DB         *Database
 )
-
-var DB *Database
 
 type Database struct {
 	db *badger.DB
@@ -342,38 +341,6 @@ func (d Database) SearchByContent(searchTerm string) ([]data.PageSearchWithFrequ
 
 	return pages, nil
 }
-
-//func (d Database) SearchWords(searchTerms []string) ([]data.Page, error) {
-//	var pages []data.Page
-//	prefixKey := []byte(fmt.Sprintf("%s:", config.PageDataPrefix))
-//
-//	err := d.db.View(func(txn *badger.Txn) error {
-//		opts := badger.DefaultIteratorOptions
-//		opts.Prefix = prefixKey
-//		it := txn.NewIterator(opts)
-//		defer it.Close()
-//
-//		for it.Seek(prefixKey); it.ValidForPrefix(prefixKey); it.Next() {
-//			item := it.Item()
-//			var page data.Page
-//
-//			if err := item.Value(func(val []byte) error {
-//				return pageUnmarshal(val, &page)
-//			}); err != nil {
-//				return err
-//			}
-//
-//			for _, search := range searchTerms {
-//				if containsWord(page.Words, search) {
-//					pages = append(pages, page)
-//				}
-//			}
-//		}
-//		return nil
-//	})
-//
-//	return pages, err
-//}
 
 func (d Database) GetAllPage() ([]data.Page, error) {
 	var pages []data.Page
