@@ -19,6 +19,8 @@ export function GetAllQueue():Promise<types.JSResp>;
 
 export function GetPaginatedQueue(arg1:types.Paginated):Promise<types.JSResp>;
 
+export function GetStatistics():Promise<types.JSResp>;
+
 export function GetTreePages(arg1:number,arg2:number):Promise<types.JSResp>;
 
 export function Handle(arg1:context.Context):Promise<void>;

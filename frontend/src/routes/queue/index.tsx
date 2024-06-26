@@ -145,12 +145,18 @@ function ShowQueueList() {
                         </Tooltip>
                     </Button>
                 </Center>
-                <Link to='/queue/failed'>
-                    <Button>
-                        <Text fontSize='xl' color='blue.500'>{t('queue_failed')}</Text>
-                    </Button>
-                </Link>
-
+                <Center gap={2}>
+                    <Link to='/queue/failed'>
+                        <Button>
+                            <Text fontSize='xl' color='blue.500'>{t('queue_failed')}</Text>
+                        </Button>
+                    </Link>
+                    <Link to='/queue/statistics'>
+                        <Button>
+                            <Text fontSize='xl' color='blue.500'>{t('queue_statistics')}</Text>
+                        </Button>
+                    </Link>
+                </Center>
 
                 {importsEnabled ? <AddHostsTxt/> : null}
                 {data && data.length > 0 ? <GenericTable data={data} columns={columns}/> : null}

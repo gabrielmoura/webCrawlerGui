@@ -1,0 +1,75 @@
+# See available configuration options here: https://golangci-lint.run/usage/configuration/
+run:
+  concurrency: 3
+  timeout: 5m
+
+# Output configuration options
+output:
+  print-issued-lines: true
+  formats:
+    - format: json
+      path: stderr
+
+# Linters configuration
+linters-settings:
+  # config for gofmt
+  gofmt:
+    simplify: true
+
+  # config for goimports
+  goimports:
+    local-prefixes: github.com/gabrielmoura/webCrawlerGui
+
+  # config for gocyclo
+  gocyclo:
+    min-complexity: 10
+
+  # config for errcheck
+  errcheck:
+    check-type-assertions: true
+    check-blank: true
+
+  # config for staticcheck
+  staticcheck:
+    checks:
+      # Example: don't use SA4006 (which reports unused variables)
+      - '-SA4006'
+
+  # config for revive
+  revive:
+    severity: warning
+    ignore-generated-header: true
+    rules:
+      - name: redundant-import-alias
+      - name: blank-imports
+      - name: context-as-argument
+
+# Enable and disable linters
+linters:
+  enable:
+    - errcheck
+    - gocyclo
+    - gofmt
+    - goimports
+    - govet
+    - ineffassign
+    - staticcheck
+    - typecheck
+    - unused
+    - revive
+    - bodyclose
+
+  disable:
+    - lll # Line length linter, can be disabled if you use another formatter
+
+issues:
+  # Excluding specific issues by their text
+  exclude:
+    - "error return value not checked.*(Close|Write|Flush|Sync)"
+    - "SA6005" # Example of staticcheck exclusion
+
+  # Exclude by files or directories
+  exclude-rules:
+    - path: _test\.go
+      linters:
+        - govet

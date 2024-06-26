@@ -49,3 +49,8 @@ type FailedType struct {
 	Url    string `json:"url"`
 	Reason string `json:"reason,omitempty"`
 }
+
+type Statistic struct {
+	TotalPages        int            `json:"total_pages,omitempty"`
+	TotalPagesPerHost map[string]int `json:"total_pages_per_host,omitempty"`
+}

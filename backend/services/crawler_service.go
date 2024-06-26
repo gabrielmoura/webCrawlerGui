@@ -119,7 +119,6 @@ func (c CrawlerService) AddHotsTxt(url string) types.JSResp {
 		}
 	}
 	resp, err := crawler.HttpRequest(url)
-	defer resp.Body.Close()
 	if err != nil {
 		log.Logger.Error("Error getting Hosts.txt", zap.Error(err))
 		return types.JSResp{
@@ -127,6 +126,8 @@ func (c CrawlerService) AddHotsTxt(url string) types.JSResp {
 			Msg:     "Error getting Hosts.txt",
 		}
 	}
+	defer resp.Body.Close()
+
 	if resp.StatusCode != http.StatusOK {
 		log.Logger.Error("Error getting Hosts.txt", zap.Error(err))
 		return types.JSResp{
@@ -333,5 +334,20 @@ func (c CrawlerService) DeleteAllFailed(prefix string) types.JSResp {
 	return types.JSResp{
 		Success: true,
 		Msg:     "Failed deleted",
+	}
+}
+
+func (c CrawlerService) GetStatistics() types.JSResp {
+	stats, err := db.DB.GetStatistics()
+	if err != nil {
+		log.Logger.Error("Error getting statistics", zap.Error(err))
+		return types.JSResp{
+			Success: false,
+			Msg:     "Error getting statistics",
+		}
+	}
+	return types.JSResp{
+		Success: true,
+		Data:    stats,
 	}
 }

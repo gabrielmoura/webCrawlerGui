@@ -2,10 +2,12 @@ package db
 
 import (
 	"WebCrawlerGui/backend/config"
+	"WebCrawlerGui/backend/helper"
 	"WebCrawlerGui/backend/infra/data"
 	"WebCrawlerGui/backend/infra/log"
 	"errors"
 	"fmt"
+	"net/url"
 	"path"
 	"sort"
 	"sync"
@@ -106,10 +108,7 @@ func (d Database) IsVisited(url string) bool {
 		}
 		return nil
 	})
-	if err != nil {
-		return false
-	}
-	return true
+	return err == nil
 }
 func (d Database) SetVisited(url string) error {
 	blockWrite.RLock()
@@ -461,4 +460,41 @@ func (d Database) ImportData(pages []data.Page) error {
 		return fmt.Errorf("error writing page: %v", errs)
 	}
 	return nil
+}
+
+// GetStatistics recupera estatísticas do banco de dados
+func (d Database) GetStatistics() (data.Statistic, error) {
+	var statistic data.Statistic
+
+	err := d.db.View(func(txn *badger.Txn) error {
+		item, err := txn.Get([]byte(config.PageDataIndexName))
+		if err != nil {
+			return err
+		}
+
+		return item.Value(func(val []byte) error {
+			var pageIndex data.PageIndex
+			if err := indexPageUnmarshal(val, &pageIndex); err != nil {
+				return err
+			}
+
+			statistic.TotalPages = len(pageIndex.Keys)
+
+			// Group and count pages by host
+			statistic.TotalPagesPerHost = make(map[string]int)
+			for _, link := range pageIndex.Keys {
+				u, err := url.Parse(link)
+				if err != nil {
+					continue
+				}
+
+				host := helper.NormalizeURL(u.Scheme + "://" + u.Host)
+				statistic.TotalPagesPerHost[host] = statistic.TotalPagesPerHost[host] + 1
+			}
+
+			return nil
+		})
+	})
+
+	return statistic, err
 }

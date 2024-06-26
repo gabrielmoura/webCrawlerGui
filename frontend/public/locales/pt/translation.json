@@ -20,6 +20,8 @@
   "results_found": "Resultados encontrados",
   "failed_list": "Listagem de falhas",
   "queue_failed": "Fila de falhas",
+  "statistics_list": "Listagem de estatísticas",
+  "queue_statistics": "Fila de estatísticas",
   "btn": {
     "update": "Atualizar",
     "search": "Buscar",

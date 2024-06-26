@@ -20,6 +20,8 @@
   "results_found": "Results Found",
   "failed_list": "Failed List",
   "queue_failed": "Queue Failed",
+  "statistics_list": "Statistics List",
+  "queue_statistics": "Queue Statistics",
   "btn": {
     "update": "Update",
     "search": "Search",

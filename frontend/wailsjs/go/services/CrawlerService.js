@@ -34,6 +34,10 @@ export function GetPaginatedQueue(arg1) {
   return window['go']['services']['CrawlerService']['GetPaginatedQueue'](arg1);
 }
 
+export function GetStatistics() {
+  return window['go']['services']['CrawlerService']['GetStatistics']();
+}
+
 export function GetTreePages(arg1, arg2) {
   return window['go']['services']['CrawlerService']['GetTreePages'](arg1, arg2);
 }

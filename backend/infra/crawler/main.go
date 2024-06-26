@@ -75,7 +75,11 @@ func processPage(pageUrl string, depth int) {
 		log.Logger.Error(fmt.Sprintf("Error extracting data: %s", err))
 		return
 	}
-	words, _ := countWordsInText(plainText)
+	words, err := countWordsInText(plainText)
+	if err != nil {
+		log.Logger.Debug(fmt.Sprintf("Error extracting data: %s", err))
+		return
+	}
 
 	dataPage.Words = words
 	dataPage.Url = pageUrl
@@ -197,12 +201,12 @@ func countWordsInText(data []byte) (map[string]int32, error) {
 	stage3 := numRegex.ReplaceAll(stage2, []byte(" "))
 
 	// Etapa 4: Normalizar texto
-	normalizedText := bytes.ToLower(stage3)
+	stage4 := bytes.ToLower(stage3)
 
 	// Etapa 5: Remova caracteres especiais e divida em palavras
-	wordRegex := regexp.MustCompile("[^\\pL\\pN\\pZ'-]+")
-	noSpecialCh := wordRegex.ReplaceAll(normalizedText, []byte(" "))
-	words := bytes.Split(noSpecialCh, []byte(" "))
+	wordRegex := regexp.MustCompile(`[^\pL\pN\pZ'-]+`)
+	stage5 := wordRegex.ReplaceAll(stage4, []byte(" "))
+	words := bytes.Split(stage5, []byte(" "))
 
 	// Etapa 6: Conte a frequência das palavras (ignorando palavras comuns)
 	wordCounts := make(map[string]int32)

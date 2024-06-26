@@ -14,6 +14,7 @@ import { Route as rootRoute } from './routes/__root'
 import { Route as ConfImport } from './routes/conf'
 import { Route as IndexImport } from './routes/index'
 import { Route as QueueIndexImport } from './routes/queue/index'
+import { Route as QueueStatisticsImport } from './routes/queue/statistics'
 import { Route as QueueFailedImport } from './routes/queue/failed'
 
 // Create/Update Routes
@@ -30,6 +31,11 @@ const IndexRoute = IndexImport.update({
 
 const QueueIndexRoute = QueueIndexImport.update({
   path: '/queue/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const QueueStatisticsRoute = QueueStatisticsImport.update({
+  path: '/queue/statistics',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -63,6 +69,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof QueueFailedImport
       parentRoute: typeof rootRoute
     }
+    '/queue/statistics': {
+      id: '/queue/statistics'
+      path: '/queue/statistics'
+      fullPath: '/queue/statistics'
+      preLoaderRoute: typeof QueueStatisticsImport
+      parentRoute: typeof rootRoute
+    }
     '/queue/': {
       id: '/queue/'
       path: '/queue'
@@ -79,6 +92,7 @@ export const routeTree = rootRoute.addChildren({
   IndexRoute,
   ConfRoute,
   QueueFailedRoute,
+  QueueStatisticsRoute,
   QueueIndexRoute,
 })
 
@@ -93,6 +107,7 @@ export const routeTree = rootRoute.addChildren({
         "/",
         "/conf",
         "/queue/failed",
+        "/queue/statistics",
         "/queue/"
       ]
     },
@@ -104,6 +119,9 @@ export const routeTree = rootRoute.addChildren({
     },
     "/queue/failed": {
       "filePath": "queue/failed.tsx"
+    },
+    "/queue/statistics": {
+      "filePath": "queue/statistics.tsx"
     },
     "/queue/": {
       "filePath": "queue/index.tsx"
