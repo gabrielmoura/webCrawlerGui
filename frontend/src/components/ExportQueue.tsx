@@ -2,15 +2,15 @@ import {IconButton, Stack, Text, Tooltip, useToast} from "@chakra-ui/react";
 import {useTranslation} from "react-i18next";
 import {useMutation} from "@tanstack/react-query";
 import {BackupService} from "../services/backup.ts";
-import {HardDriveUpload} from "lucide-react";
+import {BookDown} from "lucide-react";
 
-export function ImportData() {
+export function ExportQueue() {
     const toast = useToast()
     const {t} = useTranslation();
 
-    const mutImportData = useMutation({
-        mutationKey: ["ImportData"],
-        mutationFn: () => BackupService.Import(),
+    const mutExportQueue = useMutation({
+        mutationKey: ["ExportQueue"],
+        mutationFn: () => BackupService.ExportQueue(),
         onSuccess: (msg) => {
             toast({
                 title: t(`msg.${msg}`),
@@ -32,15 +32,15 @@ export function ImportData() {
 
     return (
         <Stack direction="row">
-            <Text fontSize="2xl" maxW="50%">
-                {t('import_label')}
+            <Text fontSize="2xl" >
+                {t('export_label')}
             </Text>
-            <Tooltip label={t('import_label')}>
+            <Tooltip label={t('export_label')}>
                 <IconButton
-                    icon={<HardDriveUpload/>}
-                    aria-label={t('import_label')}
-                    onClick={() => mutImportData.mutate()}
-                    isLoading={mutImportData.isPending}
+                    icon={<BookDown/>}
+                    aria-label={t('export_label')}
+                    onClick={() => mutExportQueue.mutate()}
+                    isLoading={mutExportQueue.isPending}
                 />
             </Tooltip>
         </Stack>

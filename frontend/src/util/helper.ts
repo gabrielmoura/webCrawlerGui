@@ -43,3 +43,16 @@ export function onEnter(event: any, callback: () => void) {
         callback()
     }
 }
+
+/**
+ * Função para validar se uma string é uma URL válida
+ * @param url
+ */
+export function validateURL(url: string): boolean {
+    try {
+        new URL(url);
+        return true;
+    } catch (e) {
+        return false;
+    }
+}

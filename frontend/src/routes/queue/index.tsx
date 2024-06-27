@@ -20,8 +20,10 @@ import {createColumnHelper} from '@tanstack/react-table';
 import {useTranslation} from "react-i18next";
 import useAppStore from "../../store/appStore.ts";
 import {AddHostsTxt} from "../../components/AddHostsTxt.tsx";
-import {onEnter} from "../../util/helper.ts";
+import {onEnter, validateURL} from "../../util/helper.ts";
 import {GenericTable} from "../../components/GenericTable.tsx";
+import {ExportQueue} from "../../components/ExportQueue.tsx";
+import {ImportQueue} from "../../components/ImportQueue.tsx";
 
 export const Route = createFileRoute('/queue/')({
     component: ShowQueueList
@@ -32,6 +34,7 @@ function ShowQueueList() {
     const {t} = useTranslation();
     const toast = useToast()
     const [url, setUrl] = useState<string>('')
+    const [invalidUrl, setInvalidUrl] = useState<boolean>(false)
     const client = useQueryClient()
 
     const {data} = useQuery({
@@ -91,6 +94,15 @@ function ShowQueueList() {
         }
     }
 
+    function handleChangeUrl(url: string) {
+        if (validateURL(url)) {
+            setInvalidUrl(false)
+        } else {
+            setInvalidUrl(true)
+        }
+        setUrl(url)
+    }
+
     function handleDeleteFromQueue(url: string) {
         if (url) {
             mutateDelete.mutate(url)
@@ -135,8 +147,9 @@ function ShowQueueList() {
                         <InputLeftAddon>Url</InputLeftAddon>
                         <Input type='text' placeholder={t('placeholder.url')}
                                value={url}
-                               onChange={({target}) => setUrl(target.value)}
+                               onChange={({target}) => handleChangeUrl(target.value)}
                                onKeyDown={e => onEnter(e, handleAddToQueue)}
+                               isInvalid={invalidUrl}
                         />
                     </InputGroup>
                     <Button onClick={() => handleAddToQueue()} isLoading={mutateCreate.isPending}>
@@ -156,6 +169,8 @@ function ShowQueueList() {
                             <Text fontSize='xl' color='blue.500'>{t('queue_statistics')}</Text>
                         </Button>
                     </Link>
+                    <ExportQueue/>
+                    <ImportQueue/>
                 </Center>
 
                 {importsEnabled ? <AddHostsTxt/> : null}
