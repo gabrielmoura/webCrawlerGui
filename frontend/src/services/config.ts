@@ -1,9 +1,11 @@
 import {types} from "../../wailsjs/go/models.ts";
 import {
+    AddToBlacklist,
+    GetBlacklist,
     GetPreferences,
     SaveWindowPosition,
     SaveWindowSize,
-    SetPreferences
+    SetPreferences,
 } from "../../wailsjs/go/services/ConfigService";
 import {EventsEmit, Hide} from "../../wailsjs/runtime";
 
@@ -58,5 +60,21 @@ export class ConfigService {
 
     static HideWindow() {
         Hide()
+    }
+
+    static async GetBlacklist(): Promise<string[]> {
+        const res = await GetBlacklist();
+        if (res.success) {
+            return Promise.resolve(res.data)
+        }
+        return Promise.reject(res.msg)
+    }
+
+    static async AddToBlacklist(url: string): Promise<string> {
+        const res = await AddToBlacklist(url);
+        if (res.success) {
+            return Promise.resolve(res.msg)
+        }
+        return Promise.reject(res.msg)
     }
 }

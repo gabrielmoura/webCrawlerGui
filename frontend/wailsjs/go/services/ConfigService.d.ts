@@ -3,6 +3,10 @@
 import {types} from '../models';
 import {context} from '../models';
 
+export function AddToBlacklist(arg1:string):Promise<types.JSResp>;
+
+export function GetBlacklist():Promise<types.JSResp>;
+
 export function GetPreferences():Promise<types.JSResp>;
 
 export function GetWindowPosition(arg1:context.Context):Promise<number|number>;

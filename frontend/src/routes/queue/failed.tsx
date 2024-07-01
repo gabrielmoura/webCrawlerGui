@@ -1,6 +1,6 @@
 import {createFileRoute} from '@tanstack/react-router'
 import {Box, Button, Center, Flex, IconButton, Skeleton, Text, Tooltip, useToast} from "@chakra-ui/react";
-import {useQuery, useQueryClient} from "@tanstack/react-query";
+import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
 import {FailedType, QueueService} from "../../services/queue.ts";
 import {useTranslation} from "react-i18next";
 import {GenericTable} from "../../components/GenericTable.tsx";
@@ -20,31 +20,52 @@ function QueueFailed() {
         queryKey: ['queue', 'failed', 'get'],
         initialData: []
     })
-
-    function handleRemoveAll() {
-        QueueService.deleteAllFailed().then(() => {
+    const mutRemoveAll = useMutation({
+        mutationKey: ['queue', 'failed', 'deleteAll'],
+        mutationFn: QueueService.deleteAllFailed,
+        onSuccess: () => {
             toast({
                 title: t('msg.delete_all_success'),
                 status: 'success',
                 duration: 9000,
                 isClosable: true,
             })
+            Promise.all([
+            client.refetchQueries({queryKey: ['queue', 'get']}),
+            client.resetQueries({queryKey: ['queue', 'failed', 'get']})
+            ]).catch(console.error)
+        }
+    })
+
+    const mutAdd = useMutation({
+        mutationKey: ['queue', 'add'],
+        mutationFn: (url: string) => QueueService.addToQueue(url),
+        onSuccess: () => {
+            toast({
+                title: t('msg.retry_success'),
+                status: 'success',
+                duration: 9000,
+                isClosable: true,
+            })
             client.refetchQueries({queryKey: ['queue', 'get']}).catch(console.error)
-        }).catch(console.error)
+        }
+    })
+
+    const mutRemove = useMutation({
+        mutationKey: ['queue', 'failed', 'remove'],
+        mutationFn: (data: string) => QueueService.deleteFailed(data),
+        onMutate: (url: string) => {
+            mutAdd.mutate(url)
+            return url
+        }
+    })
+
+    function handleRemoveAll() {
+        mutRemoveAll.mutate()
     }
 
     function handleRetry(url: string) {
-        QueueService.deleteFailed(url).then(() => {
-            QueueService.addToQueue(url).then(() => {
-                toast({
-                    title: t('msg.retry_success'),
-                    status: 'success',
-                    duration: 9000,
-                    isClosable: true,
-                })
-                client.refetchQueries({queryKey: ['queue', 'get']}).catch(console.error)
-            }).catch(console.error)
-        }).catch(console.error)
+        mutRemove.mutate(url)
     }
 
     const columnHelper = createColumnHelper<FailedType>();
@@ -68,6 +89,7 @@ function QueueFailed() {
             cell: info => (
                 <Tooltip label={t('btn.retry')}>
                     <IconButton
+                        isLoading={mutRemove.isPending}
                         onClick={() => handleRetry(info.getValue())}
                         aria-label={t('btn.retry')}
                         icon={<Undo2/>}
@@ -84,7 +106,7 @@ function QueueFailed() {
                             onClick={() => history.back()}/>
                 {t('failed_list')}</Text>
             <Flex direction={'column'}>
-                <Button onClick={() => handleRemoveAll()}>
+                <Button onClick={() => handleRemoveAll()} isLoading={mutRemoveAll.isPending}>
                     <Center gap={1}>
                         <Text>
                             Remover Todos

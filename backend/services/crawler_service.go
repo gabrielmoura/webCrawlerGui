@@ -331,6 +331,7 @@ func (c CrawlerService) DeleteAllFailed(prefix string) types.JSResp {
 			Msg:     "Error deleting failed",
 		}
 	}
+	log.Logger.Info("Failed deleted", zap.String("prefix", prefix))
 	return types.JSResp{
 		Success: true,
 		Msg:     "Failed deleted",

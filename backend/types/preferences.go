@@ -41,4 +41,6 @@ type PreferencesGeneral struct {
 
 	EnableProcessing  bool `mapstructure:"ENABLE_PROCESSING" json:"enableProcessing" yaml:"enableProcessing"`
 	EnableImportHosts bool `mapstructure:"ENABLE_IMPORT_HOSTS" json:"enableImportHosts" yaml:"enableImportHosts"`
+
+	Blacklist []string `mapstructure:"BLACKLIST" json:"blacklist" yaml:"blacklist"`
 }

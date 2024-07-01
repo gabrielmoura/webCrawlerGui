@@ -81,6 +81,8 @@ func (c *ConfigService) GetPreferences() (resp types.JSResp) {
 	}
 	return
 }
+
+// SetPreferences sets the preferences
 func (c *ConfigService) SetPreferences(pf types.Preferences) (resp types.JSResp) {
 	c.cref.Behavior = pf.Behavior
 	c.cref.General = pf.General
@@ -94,4 +96,35 @@ func (c *ConfigService) SetPreferences(pf types.Preferences) (resp types.JSResp)
 	resp.Success = true
 	resp.Msg = "Preferences saved"
 	return
+}
+
+// GetBlacklist returns the blacklist
+func (c *ConfigService) GetBlacklist() types.JSResp {
+	blacklist := config.Conf.General.Blacklist
+	if len(blacklist) == 0 {
+		return types.JSResp{
+			Success: true,
+			Msg:     "There is no data to display",
+		}
+	}
+	return types.JSResp{
+		Success: true,
+		Data:    blacklist,
+	}
+}
+
+// AddToBlacklist adds a URL to the blacklist
+func (c *ConfigService) AddToBlacklist(url string) types.JSResp {
+	config.Conf.General.Blacklist = append(config.Conf.General.Blacklist, url)
+	err := config.Conf.SaveFileConfig()
+	if err != nil {
+		return types.JSResp{
+			Success: false,
+			Msg:     "Error saving configuration",
+		}
+	}
+	return types.JSResp{
+		Success: true,
+		Msg:     "URL added to blacklist",
+	}
 }

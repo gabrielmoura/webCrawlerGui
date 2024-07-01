@@ -95,6 +95,7 @@ func (c *Config) DefaultConfig() {
 		Tlds:              []string{},
 		IgnoreLocal:       false,
 		EnableImportHosts: false,
+		Blacklist:         []string{},
 	}
 }
 

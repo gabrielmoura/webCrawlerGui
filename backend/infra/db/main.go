@@ -40,7 +40,7 @@ func InitDB(appName string) *Database {
 	//opts.Logger = nil // Desativa logs de debug
 	opts.CompactL0OnClose = true
 	opts.NumCompactors = 2
-	opts.ValueLogFileSize = 100 << 20 // 100 MB
+	//opts.ValueLogFileSize = 100 << 20 // 100 MB
 
 	db, err := badger.Open(opts)
 	if err != nil {

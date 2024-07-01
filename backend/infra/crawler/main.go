@@ -9,6 +9,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/url"
 	"regexp"
 	"strings"
 
@@ -39,6 +40,29 @@ func Mount(
 	}
 }
 
+// checkBlacklist Verifica se um link está na lista negra
+func checkBlacklist(link string) bool {
+	if config.Conf.General.Blacklist == nil {
+		return true
+	}
+
+	linkUrl, err := url.Parse(link)
+	if err != nil {
+		return false
+	}
+
+	for _, blacklist := range config.Conf.General.Blacklist {
+		blacklistUrl, err := url.Parse(blacklist)
+		if err != nil {
+			continue // Se a URL da blacklist não puder ser analisada, ignore e continue
+		}
+		if blacklistUrl.Host == linkUrl.Host {
+			return false // Encontrado na blacklist
+		}
+	}
+	return true // Não encontrado na blacklist
+}
+
 // processPage processa uma página, extrai links e dados
 func processPage(pageUrl string, depth int) {
 
@@ -47,6 +71,11 @@ func processPage(pageUrl string, depth int) {
 		log.Logger.Info(fmt.Sprintf("Reached max depth of %d, %d", config.Conf.General.MaxDepth, depth))
 		return
 	}
+	if !checkBlacklist(pageUrl) {
+		log.Logger.Info(fmt.Sprintf("URL in blacklist: %s", pageUrl))
+		return
+	}
+
 	// Só processa uma página se ela ainda não foi visitada
 
 	if GetVisited(pageUrl) {

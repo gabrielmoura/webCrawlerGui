@@ -82,18 +82,8 @@ func (d Database) DeleteFailedPrefix(prefix string) error {
 	blockWrite.RLock()
 	defer blockWrite.RUnlock()
 	key := []byte(fmt.Sprintf("%s:%s", config.PrefixFailedData, prefix))
-	return d.db.Update(func(txn *badger.Txn) error {
-		opts := badger.DefaultIteratorOptions
-		opts.PrefetchValues = false
-		it := txn.NewIterator(opts)
-		defer it.Close()
-		for it.Seek(key); it.ValidForPrefix(key); it.Next() {
-			item := it.Item()
-			err := txn.Delete(item.Key())
-			if err != nil {
-				return err
-			}
-		}
-		return nil
-	})
+	if prefix == "" {
+		key = []byte(config.PrefixFailedData)
+	}
+	return d.db.DropPrefix(key)
 }

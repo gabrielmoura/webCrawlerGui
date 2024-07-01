@@ -78,7 +78,7 @@ var DenySuffixes = []string{
 // CommonStopWords Palavras de parada comuns (personalize conforme necessário)
 var CommonStopWords = map[string][]string{
 	"en":    stopwords.En,
-	"pt":    stopwords.Pt,
+	"pt":    append(stopwords.BrazilianPortuguese, stopwords.EuropeanPortuguese...),
 	"ru":    stopwords.Ru,
 	"es":    stopwords.Es,
 	"hindi": stopwords.Hin,

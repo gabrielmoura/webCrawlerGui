@@ -67,6 +67,7 @@ export namespace types {
 	    userAgent: string;
 	    enableProcessing: boolean;
 	    enableImportHosts: boolean;
+	    blacklist: string[];
 	
 	    static createFrom(source: any = {}) {
 	        return new PreferencesGeneral(source);
@@ -93,6 +94,7 @@ export namespace types {
 	        this.userAgent = source["userAgent"];
 	        this.enableProcessing = source["enableProcessing"];
 	        this.enableImportHosts = source["enableImportHosts"];
+	        this.blacklist = source["blacklist"];
 	    }
 	}
 	export class PreferencesBehavior {
